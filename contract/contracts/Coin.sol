@@ -24,7 +24,7 @@ contract Coin is ERC20, Ownable {
         _burn(account, amount);
     }
 
-    function setContractAddress(address addr) public onlyOwner {
-        ownerContract = addr;
+    function setOwnerContract(address contractAddr) public onlyOwner {
+        ownerContract = contractAddr;
     }
 }

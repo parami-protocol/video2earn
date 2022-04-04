@@ -26,14 +26,14 @@ contract Video2Earn is ERC721Enumerable {
     }
 
     struct NftInfo {
-        uint32 value;
+        uint256 value;
         Intrest intrest;
     }
 
     struct ChatSession {
         address receiver;
-        uint32 startTime;
-        uint32 nftId;
+        uint256 startTime;
+        uint256 nftId;
         Intrest intrest;
         SessionState state;
     }
@@ -42,8 +42,8 @@ contract Video2Earn is ERC721Enumerable {
     event ChatSessionEnd(address indexed one, address indexed another, Rate rate);
 
     constructor(address _coinContracts,
-                uint32 _rewardCoinNum,
-                uint32 _nftInitialValue,
+                uint256 _rewardCoinNum,
+                uint256 _nftInitialValue,
                 uint256 _nftMintFee,
                 uint256 _nftRepairFee)
         ERC721("video2earn-nft", "VENFT") {
@@ -57,15 +57,17 @@ contract Video2Earn is ERC721Enumerable {
     address coinContracts;
     Coin coin;
 
-    uint32 rewardCoinNum;
-    uint32 nftInitialValue;
+    // coin num that should be rewarded when video chat rate is good.
+    uint256 rewardCoinNum;
+    // initial nft value after minted.
+    uint256 nftInitialValue;
+    // how much ether one should pay when mint a new nft
     uint256 nftMintFee;
+    // how much coin one should pay when repair a nft
     uint256 nftRepairFee;
 
     mapping (address => ChatSession) chatSessions;
     mapping (uint256 => NftInfo) nfts;
-
-    Counters.Counter private _tokenIds;
 
     /********************************************************************************/
     /* Prepare a chat session for sender, the chat will not start unless both party */
@@ -94,13 +96,13 @@ contract Video2Earn is ERC721Enumerable {
                   && toSession.intrest == intrest);
 
         if (toSession.state == SessionState.Empty) {
-            chatSessions[msg.sender]= ChatSession(to, 0, uint32(tokenId), intrest, SessionState.Preparing);
+            chatSessions[msg.sender]= ChatSession(to, 0, tokenId, intrest, SessionState.Preparing);
             return SessionState.Preparing;
         }
 
         if (toSession.state == SessionState.Preparing) {
-            uint32 startTime = uint32(block.timestamp);
-            chatSessions[msg.sender] = ChatSession(to, startTime, uint32(tokenId), intrest, SessionState.Ongoing);
+            uint256 startTime = block.timestamp;
+            chatSessions[msg.sender] = ChatSession(to, startTime, tokenId, intrest, SessionState.Ongoing);
             toSession.state = SessionState.Ongoing;
             toSession.startTime = startTime;
             emit ChatSessionStart(msg.sender, to);
@@ -128,16 +130,19 @@ contract Video2Earn is ERC721Enumerable {
         ChatSession storage session = chatSessions[msg.sender];
         require(session.state != SessionState.Empty);
 
-        session.state = SessionState.Empty;
 
         if (session.state == SessionState.Preparing) {
-            // return the nft value since chat didn't start
+            session.state = SessionState.Empty;
+
+            // refund the nft value since chat didn't start
             NftInfo storage nft = nfts[session.nftId];
             nft.value++;
             return;
         }
 
         if (session.state == SessionState.Ongoing) {
+            session.state = SessionState.Empty;
+
             if (rate == Rate.Good) {
                 rewardUserCoin(session.receiver, rewardCoinNum);
             }
@@ -158,13 +163,12 @@ contract Video2Earn is ERC721Enumerable {
             payable(msg.sender).transfer(msg.value - nftMintFee);
         }
 
-        _tokenIds.increment();
-        uint256 tokenId = _tokenIds.current();
+        uint256 tokenId = totalSupply();
         _mint(msg.sender, tokenId);
         nfts[tokenId] = NftInfo(nftInitialValue, intrest);
     }
 
-    function repairNft(uint256 nftId, uint32 increaseValue) external {
+    function repairNft(uint256 nftId, uint256 increaseValue) external {
         uint256 requiredCoin = increaseValue * nftRepairFee;
         uint256 balance = coin.balanceOf(msg.sender);
         require(balance >= requiredCoin);
