@@ -69,6 +69,8 @@ contract Video2Earn is ERC721Enumerable {
     mapping (address => ChatSession) chatSessions;
     mapping (uint256 => NftInfo) nfts;
 
+    mapping (address => uint256) pendingWithdraws;
+
     /********************************************************************************/
     /* Prepare a chat session for sender, the chat will not start unless both party */
     /* of the chat prepared a chat successfuly.                                     */
@@ -160,12 +162,18 @@ contract Video2Earn is ERC721Enumerable {
 
         // refund if value exceeds mint fee
         if (nftMintFee < msg.value) {
-            payable(msg.sender).transfer(msg.value - nftMintFee);
+            pendingWithdraws[msg.sender] += msg.value - nftMintFee;
         }
 
         uint256 tokenId = totalSupply();
         _mint(msg.sender, tokenId);
         nfts[tokenId] = NftInfo(nftInitialValue, intrest);
+    }
+
+    function withdraw() public {
+        uint256 refund = pendingWithdraws[msg.sender];
+        pendingWithdraws[msg.sender] = 0;
+        payable(msg.sender).transfer(refund);
     }
 
     function repairNft(uint256 nftId, uint256 increaseValue) external {
