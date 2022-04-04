@@ -9,6 +9,7 @@ contract Video2Earn is ERC721Enumerable {
     using Counters for Counters.Counter;
 
     enum Intrest {
+        None,
         Bussiness,
         Social
     }
@@ -42,7 +43,8 @@ contract Video2Earn is ERC721Enumerable {
 
     constructor() ERC721("video2earn-nft", "VENFT") {}
 
-    address payable reserved;
+    address coinContracts;
+    Coin coin;
 
     uint32 rewardCoinNum;
     uint32 nftInitialValue;
@@ -134,7 +136,7 @@ contract Video2Earn is ERC721Enumerable {
     }
 
     function rewardUserCoin(address user, uint256 numCoin) private {
-
+        coin.mint(user, numCoin);
     }
 
     function mint(Intrest intrest) external payable {
@@ -151,7 +153,15 @@ contract Video2Earn is ERC721Enumerable {
         nfts[tokenId] = NftInfo(nftInitialValue, intrest);
     }
 
-    function repairNft(uint256 nftId) external {
-    }
+    function repairNft(uint256 nftId, uint32 increaseValue) external {
+        uint256 requiredCoin = increaseValue * nftRepairFee;
+        uint256 balance = coin.balanceOf(msg.sender);
+        require(balance >= requiredCoin);
 
+        NftInfo storage nft = nfts[nftId];
+        require(nft.intrest != Intrest.None);
+
+        coin.burn(msg.sender, requiredCoin);
+        nft.value += increaseValue;
+    }
 }
