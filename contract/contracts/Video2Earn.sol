@@ -1,14 +1,29 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.4.22 <0.9.0;
 
-import "./Nft.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "./Coin.sol";
 
-contract VideoChat {
+contract Video2Earn is ERC721Enumerable {
+
+    enum Intrest {
+        Bussiness,
+        Social
+    }
 
     enum SessionState {
         Preparing,
         Ongoing
+    }
+
+    enum Rate {
+        Good,
+        Bad
+    }
+    
+    struct NftInfo {
+        uint32 value;
+        Intrest intrest;
     }
 
     struct ChatSession {
@@ -18,15 +33,15 @@ contract VideoChat {
         Intrest intrest;
     }
 
-    enum Rate {
-        Good,
-        Bad
-    }
+    constructor() ERC721("video2earn-nft", "VENFT") {}
 
-    constructor() {}
+    address payable reserved;
 
+    uint256 nftMintFee;
     uint256 nftRepairFee;
+
     mapping (address => ChatSession) chatSessions;
+    mapping (uint256 => NftInfo) nfts;
 
     /********************************************************************************/
     /* Prepare a chat session for sender, the chat will not start unless both party */
@@ -39,7 +54,6 @@ contract VideoChat {
     /********************************************************************************/
     function prepareChatSession(address to, uint256 nftId, Intrest intrest) external {
     }
-
 
     /**************************************************************************/
     /* End chat sesion for sender:                                            */
@@ -54,6 +68,9 @@ contract VideoChat {
     /* 2. the specified user doesn't belong to the sender's session.          */
     /**************************************************************************/
     function endChatSession(address to, Rate rate) external {
+    }
+
+    function mint(Intrest intrest) external payable {
     }
 
     function repairNft(uint256 nftId) external {
