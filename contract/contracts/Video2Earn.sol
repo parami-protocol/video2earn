@@ -14,6 +14,7 @@ contract Video2Earn is ERC721Enumerable {
     }
 
     enum SessionState {
+        Empty,
         Preparing,
         Ongoing
     }
@@ -22,7 +23,7 @@ contract Video2Earn is ERC721Enumerable {
         Good,
         Bad
     }
-    
+
     struct NftInfo {
         uint32 value;
         Intrest intrest;
@@ -33,12 +34,14 @@ contract Video2Earn is ERC721Enumerable {
         uint32 startTime;
         uint32 nftId;
         Intrest intrest;
+        SessionState state;
     }
 
     constructor() ERC721("video2earn-nft", "VENFT") {}
 
     address payable reserved;
 
+    uint32 rewardCoinNum;
     uint32 nftInitialValue;
     uint256 nftMintFee;
     uint256 nftRepairFee;
@@ -57,7 +60,40 @@ contract Video2Earn is ERC721Enumerable {
     /* 2. sender prepared a session already. Or                                     */
     /* 3. the "to" user prepared a session in which "to" user is not the sender.    */
     /********************************************************************************/
-    function prepareChatSession(address to, uint256 nftId, Intrest intrest) external {
+    function prepareChatSession(address to, uint256 tokenId, Intrest intrest) external returns (SessionState) {
+        require(ownerOf(tokenId) == msg.sender);
+
+        NftInfo storage nft = nfts[tokenId];
+        require(nft.intrest == intrest);
+        require(nft.value >= 1);
+        nft.value--;
+
+        ChatSession memory session = chatSessions[msg.sender];
+        require(session.state == SessionState.Empty);
+
+        ChatSession storage toSession = chatSessions[to];
+        require(toSession.state == SessionState.Empty ||
+                toSession.state == SessionState.Preparing
+                  && toSession.receiver == msg.sender
+                  && toSession.intrest == intrest);
+
+        if (toSession.state == SessionState.Empty) {
+            chatSessions[msg.sender]= ChatSession(to, 0, uint32(tokenId), intrest, SessionState.Preparing);
+            return SessionState.Preparing;
+        }
+
+        if (toSession.state == SessionState.Preparing) {
+            uint32 startTime = uint32(block.timestamp);
+            chatSessions[msg.sender] = ChatSession(to, startTime, uint32(tokenId), intrest, SessionState.Ongoing);
+            toSession.state = SessionState.Ongoing;
+            toSession.startTime = startTime;
+            return SessionState.Ongoing;
+        }
+
+        assert(false);
+        // should never be here
+        // make the compiler happy;
+        return SessionState.Empty;
     }
 
     /**************************************************************************/
@@ -69,10 +105,31 @@ contract Video2Earn is ERC721Enumerable {
     /*       Reward the target user if the rate is good.                      */
     /*                                                                        */
     /* throw errors if:                                                       */
-    /* 1. sender doesn't have a session. Or                                   */
-    /* 2. the specified user doesn't belong to the sender's session.          */
+    /* 1. sender doesn't have a session.                                    */
     /**************************************************************************/
-    function endChatSession(address to, Rate rate) external {
+    function endChatSession(Rate rate) external {
+        ChatSession storage session = chatSessions[msg.sender];
+        require(session.state != SessionState.Empty);
+
+        session.state = SessionState.Empty;
+
+        if (session.state == SessionState.Preparing) {
+            // return the nft value since chat didn't start
+            NftInfo storage nft = nfts[session.nftId];
+            nft.value++;
+            return;
+        }
+
+        if (session.state == SessionState.Ongoing) {
+            if (rate == Rate.Good) {
+                rewardUserCoin(session.receiver, rewardCoinNum);
+            }
+        }
+
+    }
+
+    function rewardUserCoin(address user, uint256 numCoin) private {
+
     }
 
     function mint(Intrest intrest) external payable {
