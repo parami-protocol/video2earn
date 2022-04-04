@@ -154,7 +154,7 @@ contract Video2Earn is ERC721Enumerable {
     }
 
     function rewardUserCoin(address user, uint256 numCoin) private {
-        coin.pendMintCoins(user, numCoin);
+        coin.pendWithdraws(user, numCoin);
     }
 
     function mint(Intrest intrest) external payable {

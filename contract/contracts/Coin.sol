@@ -8,7 +8,7 @@ contract Coin is ERC20, Ownable {
 
     address ownerContract;
 
-    mapping(address => uint256) pendingMintCoins;
+    mapping(address => uint256) pendingWithdraws;
 
     modifier onlyContract() {
         require(msg.sender == ownerContract);
@@ -18,8 +18,8 @@ contract Coin is ERC20, Ownable {
     constructor() ERC20("video2earn-coin", "V2EC") {
     }
 
-    function pendMintCoins(address account, uint256 amount) public onlyContract {
-        pendingMintCoins[account] += amount;
+    function pendWithdraws(address account, uint256 amount) public onlyContract {
+        pendingWithdraws[account] += amount;
     }
 
     function burn(address account, uint256 amount) public onlyContract {
@@ -27,8 +27,8 @@ contract Coin is ERC20, Ownable {
     }
 
     function withdraw() public {
-        uint256 coins = pendingMintCoins[msg.sender];
-        pendingMintCoins[msg.sender] = 0;
+        uint256 coins = pendingWithdraws[msg.sender];
+        pendingWithdraws[msg.sender] = 0;
         _mint(msg.sender, coins);
     }
 
