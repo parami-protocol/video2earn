@@ -187,4 +187,8 @@ contract Video2Earn is ERC721Enumerable {
         coin.burn(msg.sender, requiredCoin);
         nft.value += increaseValue;
     }
+
+    function nftInfoOf(uint256 tokenId) external view returns (NftInfo memory) {
+        return nfts[tokenId];
+    }
 }
