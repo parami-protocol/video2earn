@@ -8,7 +8,7 @@ contract Coin is ERC20, Ownable {
 
     address ownerContract;
 
-    mapping(address => uint32) pendingMintCoins;
+    mapping(address => uint256) pendingMintCoins;
 
     modifier onlyContract() {
         require(msg.sender == ownerContract);
@@ -27,8 +27,8 @@ contract Coin is ERC20, Ownable {
     }
 
     function withdraw() public {
-        uint256 coins = pendingWithdraws[msg.sender];
-        pendingWithdraws[msg.sender] = 0;
+        uint256 coins = pendingMintCoins[msg.sender];
+        pendingMintCoins[msg.sender] = 0;
         _mint(msg.sender, coins);
     }
 
