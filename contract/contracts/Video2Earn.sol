@@ -41,7 +41,18 @@ contract Video2Earn is ERC721Enumerable {
     event ChatSessionStart(address indexed one, address indexed another);
     event ChatSessionEnd(address indexed one, address indexed another, Rate rate);
 
-    constructor() ERC721("video2earn-nft", "VENFT") {}
+    constructor(address _coinContracts,
+                uint32 _rewardCoinNum,
+                uint32 _nftInitialValue,
+                uint256 _nftMintFee,
+                uint256 _nftRepairFee)
+        ERC721("video2earn-nft", "VENFT") {
+        rewardCoinNum = _rewardCoinNum;
+        coinContracts = _coinContracts;
+        nftInitialValue = _nftInitialValue;
+        nftMintFee = _nftMintFee;
+        nftRepairFee = _nftRepairFee;
+    }
 
     address coinContracts;
     Coin coin;
