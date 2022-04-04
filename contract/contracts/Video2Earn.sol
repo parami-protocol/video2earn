@@ -2,9 +2,11 @@
 pragma solidity >=0.4.22 <0.9.0;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
 import "./Coin.sol";
 
 contract Video2Earn is ERC721Enumerable {
+    using Counters for Counters.Counter;
 
     enum Intrest {
         Bussiness,
@@ -37,11 +39,14 @@ contract Video2Earn is ERC721Enumerable {
 
     address payable reserved;
 
+    uint32 nftInitialValue;
     uint256 nftMintFee;
     uint256 nftRepairFee;
 
     mapping (address => ChatSession) chatSessions;
     mapping (uint256 => NftInfo) nfts;
+
+    Counters.Counter private _tokenIds;
 
     /********************************************************************************/
     /* Prepare a chat session for sender, the chat will not start unless both party */
@@ -71,6 +76,17 @@ contract Video2Earn is ERC721Enumerable {
     }
 
     function mint(Intrest intrest) external payable {
+        require(msg.value >= nftMintFee);
+
+        // refund if value exceeds mint fee
+        if (nftMintFee < msg.value) {
+            payable(msg.sender).transfer(msg.value - nftMintFee);
+        }
+
+        _tokenIds.increment();
+        uint256 tokenId = _tokenIds.current();
+        _mint(msg.sender, tokenId);
+        nfts[tokenId] = NftInfo(nftInitialValue, intrest);
     }
 
     function repairNft(uint256 nftId) external {
