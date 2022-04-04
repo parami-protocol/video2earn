@@ -37,6 +37,9 @@ contract Video2Earn is ERC721Enumerable {
         SessionState state;
     }
 
+    event ChatSessionStart(address indexed one, address indexed another);
+    event ChatSessionEnd(address indexed one, address indexed another, Rate rate);
+
     constructor() ERC721("video2earn-nft", "VENFT") {}
 
     address payable reserved;
@@ -87,6 +90,7 @@ contract Video2Earn is ERC721Enumerable {
             chatSessions[msg.sender] = ChatSession(to, startTime, uint32(tokenId), intrest, SessionState.Ongoing);
             toSession.state = SessionState.Ongoing;
             toSession.startTime = startTime;
+            emit ChatSessionStart(msg.sender, to);
             return SessionState.Ongoing;
         }
 
@@ -124,6 +128,7 @@ contract Video2Earn is ERC721Enumerable {
             if (rate == Rate.Good) {
                 rewardUserCoin(session.receiver, rewardCoinNum);
             }
+            emit ChatSessionEnd(msg.sender, session.receiver, rate);
         }
 
     }
