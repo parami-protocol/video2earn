@@ -159,6 +159,7 @@ contract Video2Earn is ERC721Enumerable {
 
     function mint(Intrest intrest) external payable {
         require(msg.value >= nftMintFee);
+        require(intrest != Intrest.None);
 
         // refund if value exceeds mint fee
         if (nftMintFee < msg.value) {
@@ -188,7 +189,15 @@ contract Video2Earn is ERC721Enumerable {
         nft.value += increaseValue;
     }
 
+    function pendingWithdrawOf(address owner) external view returns (uint256) {
+        return pendingWithdraws[owner];
+    }
+
     function nftInfoOf(uint256 tokenId) external view returns (NftInfo memory) {
         return nfts[tokenId];
+    }
+
+    function chatSessionOf(address owner) external view returns (ChatSession memory) {
+        return chatSessions[owner];
     }
 }
