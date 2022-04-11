@@ -40,6 +40,11 @@
     layout: false,
     routes: [
       {
+        path: '/chat-room',
+        name: 'chatroom',
+        component: './chat/'
+      },
+      {
         path: '/user',
         routes: [
           {
