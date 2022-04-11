@@ -4,6 +4,7 @@ import defaultSettings from '../config/defaultSettings';
 // import Loading from './components/Loading/Loading';
 import { notification } from 'antd';
 import NoFoundPage from './pages/404';
+import Header from './components/Header';
 // import Header from './components/Header';
 
 export const initialStateConfig = {
@@ -38,7 +39,7 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
     rightContentRender: () => undefined,
     disableContentMargin: true,
     footerRender: () => undefined,
-    // headerRender: () => <Header />,
+    headerRender: () => <Header />,
     onPageChange: () => {
       setInitialState({ ...initialState });
     },

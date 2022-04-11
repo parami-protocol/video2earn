@@ -1,5 +1,12 @@
+import Header from '@/components/Header';
+
 const ListNFT: React.FC = () => {
-  return <div>List NFT</div>;
+  return (
+    <>
+      <Header></Header>
+      <div>List NFT</div>
+    </>
+  );
 };
 
 export default ListNFT;

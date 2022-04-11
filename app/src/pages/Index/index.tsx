@@ -27,27 +27,29 @@ const Index: React.FC = () => {
   let selectedChannel: CheckGroupValueType = '0';
 
   return (
-    <div>
-      <Row type="flex" justify="center">
-        <CheckCard.Group
-          onChange={(value) => {
-            console.log('value', value);
-            selectedChannel = value;
-          }}
-          defaultValue={selectedChannel}
-        >
-          {channelCards}
-        </CheckCard.Group>
-      </Row>
-      <Row type="flex" justify="center">
-        <Button type="primary" size="large" onClick={() => enterChannel(selectedChannel)}>
-          Let's Chat
-        </Button>
-      </Row>
-      <Row type="flex" justify="center">
-        <Footer></Footer>
-      </Row>
-    </div>
+    <>
+      <div>
+        <Row type="flex" justify="center">
+          <CheckCard.Group
+            onChange={(value) => {
+              console.log('value', value);
+              selectedChannel = value;
+            }}
+            defaultValue={selectedChannel}
+          >
+            {channelCards}
+          </CheckCard.Group>
+        </Row>
+        <Row type="flex" justify="center">
+          <Button type="primary" size="large" onClick={() => enterChannel(selectedChannel)}>
+            Let's Chat
+          </Button>
+        </Row>
+        <Row type="flex" justify="center">
+          <Footer></Footer>
+        </Row>
+      </div>
+    </>
   );
 };
 

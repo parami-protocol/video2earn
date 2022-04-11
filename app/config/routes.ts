@@ -42,18 +42,7 @@
       {
         path: '/chat-room',
         name: 'chatroom',
-        component: './chat/'
-      },
-      {
-        path: '/user',
-        routes: [
-          {
-            name: 'login',
-            path: '/user/login',
-            component: './user/Login',
-            hideInMenu: false,
-          },
-        ],
+        component: './chat/',
       },
       {
         component: './404',
