@@ -1,5 +1,21 @@
 ﻿export default [
   {
+    path: '/',
+    layout: false,
+    routes: [
+      {
+        path: '/',
+        redirect: '/index',
+      },
+      {
+        name: 'index',
+        path: '/index',
+        component: './Index',
+        hideInMenu: false,
+      },
+    ],
+  },
+  {
     path: '/user',
     layout: false,
     routes: [
@@ -10,6 +26,7 @@
             name: 'login',
             path: '/user/login',
             component: './user/Login',
+            hideInMenu: false,
           },
         ],
       },
