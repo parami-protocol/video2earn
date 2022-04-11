@@ -1,16 +1,36 @@
 ﻿export default [
   {
-    path: '/',
+    path: '/index',
     layout: false,
     routes: [
-      {
-        path: '/',
-        redirect: '/index',
-      },
       {
         name: 'index',
         path: '/index',
         component: './Index',
+        hideInMenu: false,
+      },
+    ],
+  },
+  {
+    path: '/nft/buy',
+    layout: false,
+    routes: [
+      {
+        name: 'buy',
+        path: '/nft/buy',
+        component: './nft/Buy',
+        hideInMenu: false,
+      },
+    ],
+  },
+  {
+    path: '/nft/list',
+    layout: false,
+    routes: [
+      {
+        name: 'list',
+        path: '/nft/list',
+        component: './nft/List',
         hideInMenu: false,
       },
     ],

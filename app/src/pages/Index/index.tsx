@@ -1,6 +1,6 @@
 import { Card, Row, Col, Button } from 'antd';
 import { CheckCard } from '@ant-design/pro-card';
-import { CheckGroupValueType } from '@ant-design/pro-card/lib/components/CheckCard/Group';
+import type { CheckGroupValueType } from '@ant-design/pro-card/lib/components/CheckCard/Group';
 import Footer from '@/components/Footer';
 
 const { Meta } = Card;
@@ -9,9 +9,9 @@ function enterChannel(selectedChannel: CheckGroupValueType) {
   console.log('enter channel: ', selectedChannel);
 }
 
-export default () => {
-  let channelCards = ['business channel', 'social channel'].map((name, i) => (
-    <Col span="8">
+const Index: React.FC = () => {
+  const channelCards = ['business channel', 'social channel'].map((name, i) => (
+    <Col key={name} span="8">
       <CheckCard
         style={{ width: 240 }}
         cover={
@@ -40,7 +40,7 @@ export default () => {
         </CheckCard.Group>
       </Row>
       <Row type="flex" justify="center">
-        <Button type="primary" size="large" onClick={(event) => enterChannel(selectedChannel)}>
+        <Button type="primary" size="large" onClick={() => enterChannel(selectedChannel)}>
           Let's Chat
         </Button>
       </Row>
@@ -50,3 +50,5 @@ export default () => {
     </div>
   );
 };
+
+export default Index;
