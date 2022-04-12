@@ -29,7 +29,6 @@ const Header: React.FC = () => {
             history.push('/');
           }}
         >
-          {/* <img src={'/images/background/moon.svg'} className={style.logoImg} /> */}
           <span>Video2Earn</span>
         </div>
         <div className={style.connectWallet}>
