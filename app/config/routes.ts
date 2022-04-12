@@ -14,8 +14,8 @@
   {
     path: '/chat-room',
     name: 'chatRoom',
-    component: './chat/',
-    hideInMenu: false,
+    component: './chat/Chat',
+    hideInMenu: false
   },
   {
     component: './404',
