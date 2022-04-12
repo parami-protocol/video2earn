@@ -44,7 +44,7 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
       setInitialState({ ...initialState });
     },
     headerTheme: 'light',
-    headerHeight: 70,
+    headerHeight: 150,
     unAccessible: <NoFoundPage />,
     ...initialState?.settings,
   };

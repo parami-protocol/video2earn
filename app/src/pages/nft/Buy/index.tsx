@@ -1,9 +1,7 @@
 import { Row, Col, Button, Card } from 'antd';
-import Footer from '@/components/Footer';
 import Meta from 'antd/lib/card/Meta';
 import { useModel } from 'umi';
 import { ethers } from 'ethers';
-import Header from '@/components/Header';
 
 const BuyNFT: React.FC = () => {
   const { V2EContract } = useModel('V2EContract');
@@ -32,13 +30,9 @@ const BuyNFT: React.FC = () => {
 
   return (
     <>
-      <Header></Header>
       <div>
         <Row type="flex" justify="center">
           {channelCards}
-        </Row>
-        <Row type="flex" justify="center">
-          <Footer></Footer>
         </Row>
       </div>
     </>

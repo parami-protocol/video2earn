@@ -1,10 +1,8 @@
 import { Card, Row, Col, Button } from 'antd';
 import { CheckCard } from '@ant-design/pro-card';
 import type { CheckGroupValueType } from '@ant-design/pro-card/lib/components/CheckCard/Group';
-import Footer from '@/components/Footer';
 import { useModel } from 'umi';
-import Header from '@/components/Header';
-import { BigNumber } from 'ethers';
+import type { BigNumber } from 'ethers';
 
 const { Meta } = Card;
 
@@ -39,7 +37,6 @@ const Index: React.FC = () => {
 
   return (
     <>
-      <Header></Header>
       <div>
         <Row type="flex" justify="center">
           <CheckCard.Group
@@ -56,9 +53,6 @@ const Index: React.FC = () => {
           <Button type="primary" size="large" onClick={() => enterChannel(selectedChannel)}>
             Let's Chat
           </Button>
-        </Row>
-        <Row type="flex" justify="center">
-          <Footer></Footer>
         </Row>
       </div>
     </>
