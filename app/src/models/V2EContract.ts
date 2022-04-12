@@ -1,3 +1,4 @@
+import type { BigNumber } from 'ethers';
 import { ethers } from 'ethers';
 import { useState, useEffect } from 'react';
 // abi
@@ -11,6 +12,49 @@ export default () => {
   // Contract instances
   const [V2EContract, setV2EContract] = useState<ethers.Contract | null>(null);
 
+  const balanceOfCurUser = async (): Promise<BigNumber> => {
+    return await V2EContract?.balanceOf(Account);
+  };
+
+  const tokenOfCurUserByIndex = async (index: number): Promise<BigNumber> => {
+    try {
+      return (await V2EContract?.tokenOfOwnerByIndex(Account, index)) as BigNumber;
+    } catch (e) {
+      console.error('when call tokenOfCurUserByIndex, error occurs, ', e);
+      throw e;
+    }
+  };
+
+  const loadAllTokenOfCurUserInV2E = async (): Promise<BigNumber[]> => {
+    //TODO(ironman_ch): async in paralell
+    const res = [];
+    const tokenCountOfCurUser = await balanceOfCurUser();
+    for (let i = 0; tokenCountOfCurUser.gt(i); i++) {
+      res.push(await tokenOfCurUserByIndex(i));
+    }
+
+    return res;
+  };
+
+  const nftInfoOf = async (tokenId: BigNumber): Promise<[BigNumber, number]> => {
+    return await V2EContract?.nftInfoOf(tokenId);
+  };
+
+  const selectTokenWithCriteriaExistOfCurUser = async (
+    fn: (nftInfo: [BigNumber, number]) => boolean,
+  ): Promise<BigNumber | null> => {
+    //TODO(ironman_ch): async in paralell
+    const tokenIds = await loadAllTokenOfCurUserInV2E();
+    for (const tokenId of tokenIds) {
+      const nftInfoFromRemote = await nftInfoOf(tokenId);
+      console.log('nftInfo is , ', nftInfoFromRemote);
+      if (fn(nftInfoFromRemote)) {
+        return tokenId;
+      }
+    }
+
+    return null;
+  };
   // Initialize contract instances
   useEffect(() => {
     if (!!Account) {
@@ -32,5 +76,7 @@ export default () => {
 
   return {
     V2EContract,
+    tokenOfCurUserByIndex,
+    selectTokenWithCriteriaExistOfCurUser,
   };
 };

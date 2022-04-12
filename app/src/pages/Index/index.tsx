@@ -2,14 +2,25 @@ import { Card, Row, Col, Button } from 'antd';
 import { CheckCard } from '@ant-design/pro-card';
 import type { CheckGroupValueType } from '@ant-design/pro-card/lib/components/CheckCard/Group';
 import Footer from '@/components/Footer';
+import { useModel } from 'umi';
+import Header from '@/components/Header';
+import { BigNumber } from 'ethers';
 
 const { Meta } = Card;
 
-function enterChannel(selectedChannel: CheckGroupValueType) {
-  console.log('enter channel: ', selectedChannel);
-}
-
 const Index: React.FC = () => {
+  const { selectTokenWithCriteriaExistOfCurUser } = useModel('V2EContract');
+
+  const enterChannel = async (selectedChannel: CheckGroupValueType) => {
+    //TODO(ironman_ch): add pre-check if user has corresponding nft
+    const selectedTokenId = await selectTokenWithCriteriaExistOfCurUser(
+      (nftInfo: [BigNumber, number]) => {
+        return nftInfo[0].gt(0) && nftInfo[1] == parseInt(selectedChannel as string);
+      },
+    );
+    console.log('enter channel: ', selectedChannel, ', with selectTokenId: ', selectedTokenId);
+  };
+
   const channelCards = ['business channel', 'social channel'].map((name, i) => (
     <Col key={name} span="8">
       <CheckCard
@@ -28,6 +39,7 @@ const Index: React.FC = () => {
 
   return (
     <>
+      <Header></Header>
       <div>
         <Row type="flex" justify="center">
           <CheckCard.Group
