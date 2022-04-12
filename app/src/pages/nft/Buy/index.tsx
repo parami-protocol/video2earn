@@ -1,7 +1,7 @@
 import { Row, Col, Button, Card } from 'antd';
 import Meta from 'antd/lib/card/Meta';
 import { useModel } from 'umi';
-import { ethers } from 'ethers';
+import { mint } from '@/services/contract/V2EService';
 
 const BuyNFT: React.FC = () => {
   const { V2EContract } = useModel('V2EContract');
@@ -9,7 +9,7 @@ const BuyNFT: React.FC = () => {
 
   const buyNFT = async (nftIndex: number) => {
     console.log('buyNFT: ', nftIndex, ', with Account: ', Account);
-    await V2EContract?.mint(nftIndex, { value: ethers.utils.parseEther('0.1') });
+    await mint(V2EContract, nftIndex.toString());
   };
 
   const channelCards = ['business channel', 'social channel'].map((name, i) => (

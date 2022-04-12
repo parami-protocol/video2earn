@@ -1,5 +1,11 @@
 ﻿export default [
   {
+    name: 'index',
+    path: '/',
+    component: './Index',
+    hideInMenu: true,
+  },
+  {
     name: 'buyNFT',
     path: '/nft/buy',
     component: './nft/Buy',
@@ -15,7 +21,7 @@
     path: '/chat-room',
     name: 'chatRoom',
     component: './chat/Chat',
-    hideInMenu: false
+    hideInMenu: false,
   },
   {
     component: './404',
