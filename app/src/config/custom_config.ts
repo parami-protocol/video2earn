@@ -12,3 +12,6 @@ export const contractAddresses = {
     4: '0x69459536E930D570DC166c780F6F416dF0eb9CEC',
   },
 };
+
+export const openSeaApiKey = "";
+export const openSeaEndpoint = "https://testnets-api.opensea.io";
