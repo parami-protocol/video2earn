@@ -58,6 +58,7 @@ interface RateInfo {
 }
 
 const ChatRoom: React.FC = () => {
+  //@ts-ignore
   const { V2EContract, Account } = useModel('V2EContract');
 
   const [countdownInSecs, setCountdownInSecs] = useState(0);
@@ -201,18 +202,29 @@ const ChatRoom: React.FC = () => {
       );
     }
 
-    promises.push(
-      requestSession(Account, params.channel, 5).then((sessionResponse) => {
+    Promise.all(promises)
+      .then(() => transitionToMatching())
+      .catch((err) => transitionToFailed(err));
+  }, [chatState]);
+
+  useEffect(() => {
+    if (chatState != ChatState.matching) {
+      return;
+    }
+    requestSession(Account, params.channel, 5)
+      .then((sessionResponse) => {
+        console.log('session response');
+        if (typeof sessionResponse != 'object') {
+          throw new Error('response unknown');
+        }
         const chatSession: ChatSession = {
           ...sessionResponse,
         };
         setChatSession(chatSession);
-      }),
-    );
-
-    Promise.all(promises)
-      .then(() => transitionToMatching())
-      .catch((err) => transitionToFailed(err));
+      })
+      .catch((err) => {
+        // transitionToFailed(err);
+      });
   }, [chatState]);
 
   useEffect(() => {
@@ -239,7 +251,11 @@ const ChatRoom: React.FC = () => {
       }
     });
 
-    zgEngine.loginRoom(chatSession.roomId, chatSession.token, { userID: chatSession.userId });
+    zgEngine
+      .loginRoom(chatSession.roomId, chatSession.token, { userID: chatSession.userId })
+      .catch((error) => {
+        transitionToFailed(error);
+      });
 
     return () => {
       zgEngine.off('roomStateUpdate');

@@ -1,4 +1,5 @@
 import { config } from 'dotenv';
+
 config();
 export const defaultChainId = 4;
 
@@ -13,5 +14,25 @@ export const contractAddresses = {
   },
 };
 
-export const openSeaApiKey = "";
-export const openSeaEndpoint = "https://testnets-api.opensea.io";
+export const openSeaApiKey = '';
+export const openSeaEndpoint = 'https://testnets-api.opensea.io';
+
+export const etherscanConfig = {
+  endpoint: 'https://api.etherscan.io/api',
+  apiKey: 'G5IZJQGRVT5KDR8718WQX5B71DMFK3MT8S',
+};
+
+export const erc20contracts = [
+  {
+    address: '0xdac17f958d2ee523a2206206994597c13d831ec7',
+    name: 'Tether USD',
+    symbol: 'USDT',
+    decimal: 10e6,
+  },
+  {
+    address: '0xB8c77482e45F1F44dE1745F52C74426C631bDD52',
+    name: 'BNB',
+    symbol: 'BNB',
+    decimal: 10e18,
+  },
+];
