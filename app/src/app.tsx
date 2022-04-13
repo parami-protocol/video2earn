@@ -39,12 +39,12 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
     rightContentRender: () => undefined,
     disableContentMargin: true,
     footerRender: () => undefined,
-    headerRender: () => <Header />,
+    // headerRender: () => <Header />,
     onPageChange: () => {
       setInitialState({ ...initialState });
     },
-    headerTheme: 'light',
-    headerHeight: 64,
+    // headerTheme: 'light',
+    // headerHeight: 64,
     unAccessible: <NoFoundPage />,
     ...initialState?.settings,
   };

@@ -1,18 +1,19 @@
-import React, {useEffect, useRef, useState} from 'react'
-import {stringify} from "querystring";
-import {ZegoExpressEngine} from "zego-express-engine-webrtc";
+import React, { useEffect, useRef, useState } from 'react';
+import { stringify } from 'querystring';
+import { ZegoExpressEngine } from 'zego-express-engine-webrtc';
+import style from './index.less';
 
-const zgEngine =
-  new ZegoExpressEngine(573234333, "wss://webliveroom573234333-api.imzego.com/ws")
-
+const zgEngine = new ZegoExpressEngine(573234333, 'wss://webliveroom573234333-api.imzego.com/ws');
 
 const user1Config = {
-  token: "03AAAAAGJWQ94AEDNsbGMzM3Z1cm02aTltcDMAoFNdp4iX+IYwCDCcXHA3zWJMj7dOLlM1xtFzs/70QsMOn1G9qwvHN2bbkdtsB4CtSdA6IZrVMu1YmMZXyoMfTS/PFcHMCtY5PQHm0HtJq5YutdeOeZKimGapBELlKglUpjUWyV2On1HIMtVKDEJ762eHX4QNN2HT8Ofq3u5qHc4Gm2IOd5qEH3JeWUTvBV+6U4lDYxRJhxSie9J1NUqe/e4=",
-  user: {"userID": "user1"}
+  token:
+    '03AAAAAGJXwPoAEHp6cjE5eTI3cm94Y3hoZjgAoHGsK9co7SsgozK0M8aZEcuL21wnDPhQnPfpG17j4xvC4HglNr6xMQZ7k/FwwujXobVzQRuoHRt+AoIlbK8oinVGoYBi9G/zLnZ1Mq6nUsWctSQe2i3/WOK7R7slaRD9AYX6YM1pT7bR+ehVoonj5FD0bY/ouKHf1C7DPC0EUryFM4ANYq7P8nHr7dKp31uVNjl9Q273AeUX+Hbuayb5mb0=',
+  user: { userID: 'user1' },
 };
 const user2Config = {
-  token: "03AAAAAGJWRqUAEHJmMXJycWx4cjlhZTZ3NnQAoECttj8Rg4S1Q0gN2tZmeVrp/LNlRROPpYfN065PCA8O3PizQjsbP1qsBzziZXyAFDdc8VqwoLHvtwIvW/hgp7I00As9S8HizTuTjguAKibPe5m2QcO8u98RX4Kn+Gvl5WLRmPJkrmDqL/l2JNbFg93ODkl/7lsP1p5j7Bg+XrA1TQOPGEPyfFmDw0ipfi0D+Ec2A11Px2GLsAX9O7T2ln0=",
-  user: {"userID": "user2"}
+  token:
+    '03AAAAAGJXwSIAEGlweWRrMGRkMnV0dnFnanEAoAGZkFYFrxB/ercAOAsxGqciOGGE7YKw9+p//JyMWS+xT4/f6QZDVqg3s5/brmlYUMfNgsy67qrzNkZcWe66sB7GUal33cmdNpLTcyNvF86nuW5xJtqJeh7gFEE35wnoq0SJ1dK28J46JJI8ljVSTaKKs2flWynapFeZ59cRgiumKQlPUUV4UbbKyoJge1ANn9pE2bUwC8cYlzy1lZYlyLg=',
+  user: { userID: 'user2' },
 };
 
 enum ChatState {
@@ -30,55 +31,63 @@ enum ChatRate {
 }
 
 interface ChatSession {
-  token: string,
-  userId: string,
-  roomId: string,
-  userName?: string,
+  token: string;
+  userId: string;
+  roomId: string;
+  userName?: string;
 }
 
 interface VideoStreamState {
-  remoteStream?: MediaStream,
-  localStream?: MediaStream,
-  session?: ChatSession,
-  pushStreamReady?: boolean,
-  pullStreamReady?: boolean,
+  remoteStream?: MediaStream;
+  localStream?: MediaStream;
+  session?: ChatSession;
+  pushStreamReady?: boolean;
+  pullStreamReady?: boolean;
 }
 
 interface RateInfo {
-  rate: ChatRate,
-  rated: boolean,
-  showRate: boolean
+  rate: ChatRate;
+  rated: boolean;
+  showRate: boolean;
 }
 
 const ChatRoom: React.FC = () => {
-
   const [countdownInSecs, setCountdownInSecs] = useState(0);
   const [chatState, setChatState] = useState(ChatState.preparing);
 
-  const [rate, setRate] = useState<RateInfo>({rate: ChatRate.good, rated: false, showRate: false})
-  const streamState = useRef<VideoStreamState>({})
+  const [rate, setRate] = useState<RateInfo>({
+    rate: ChatRate.good,
+    rated: false,
+    showRate: false,
+  });
+  const streamState = useRef<VideoStreamState>({});
 
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
 
-  const [failedReason, setFailedReason] = useState<string>("");
+  const [failedReason, setFailedReason] = useState<string>('');
 
   useEffect(() => {
     if (!streamState.current.localStream) {
-      zgEngine.setLogConfig({logLevel: "error"});
-      zgEngine.createStream().then((stream) => {
-        streamState.current.localStream = stream;
-        setChatState(ChatState.matching);
-        setCountdownInSecs(5);
-      }).catch(reason => {
-        transitionToFailed(reason);
-      })
+      zgEngine.setLogConfig({ logLevel: 'error' });
+      zgEngine
+        .createStream()
+        .then((stream) => {
+          streamState.current.localStream = stream;
+          setChatState(ChatState.matching);
+          setCountdownInSecs(5);
+        })
+        .catch((reason) => {
+          transitionToFailed(reason);
+        });
     }
-    if (streamState.current.localStream && (chatState == ChatState.failed || chatState == ChatState.done)) {
+    if (
+      streamState.current.localStream &&
+      (chatState == ChatState.failed || chatState == ChatState.done)
+    ) {
       zgEngine.destroyStream(streamState.current.localStream);
     }
-  }, [chatState])
-
+  }, [chatState]);
 
   function RateComponent(prop: any) {
     const rate = prop.rate;
@@ -92,10 +101,10 @@ const ChatRoom: React.FC = () => {
           <button onClick={() => rateUser(ChatRate.good)}>Good</button>
           <button onClick={() => rateUser(ChatRate.bad)}>Bad</button>
         </div>
-      )
+      );
     }
 
-    return (<div> rate: {rate.rate == 0 ? "Good" : "Bad" } </div>)
+    return <div> rate: {rate.rate == 0 ? 'Good' : 'Bad'} </div>;
   }
 
   useEffect(() => {
@@ -105,15 +114,15 @@ const ChatRoom: React.FC = () => {
     if (remoteVideoRef.current != null && streamState.current.remoteStream != null) {
       remoteVideoRef.current.srcObject = streamState.current.remoteStream;
     }
-  }, [chatState])
+  }, [chatState]);
 
   function requestSession(user: any) {
-    streamState.current.session = {userId: user.user.userID, token: user.token, roomId: "1"}
+    streamState.current.session = { userId: user.user.userID, token: user.token, roomId: '1' };
     transitionToConnecting();
   }
 
   function rateUser(rate: ChatRate) {
-    setRate({rate: rate, rated: true, showRate: true})
+    setRate({ rate: rate, rated: true, showRate: true });
     if (rate == ChatRate.bad) {
       transitionToDone();
     }
@@ -125,8 +134,7 @@ const ChatRoom: React.FC = () => {
   }
 
   function tryTransitionToChatting() {
-    if (!streamState.current.pushStreamReady
-      || !streamState.current.pullStreamReady) {
+    if (!streamState.current.pushStreamReady || !streamState.current.pullStreamReady) {
       return;
     }
     setChatState(ChatState.chatting);
@@ -147,23 +155,23 @@ const ChatRoom: React.FC = () => {
     if (chatState != ChatState.matching) {
       return;
     }
-  }, [chatState])
+  }, [chatState]);
 
   useEffect(() => {
     if (chatState != ChatState.connecting) {
       return;
     }
-    zgEngine.on("roomStateUpdate", async (roomId, state, errorCode, extendedData) => {
+    zgEngine.on('roomStateUpdate', async (roomId, state, errorCode, extendedData) => {
       if (state == 'CONNECTED') {
         let streamID = new Date().getTime().toString();
         if (!streamState.current.localStream) {
-          throw new Error("local stream not found");
+          throw new Error('local stream not found');
         }
         zgEngine.startPublishingStream(streamID, streamState.current.localStream);
         streamState.current.pushStreamReady = true;
         tryTransitionToChatting();
       }
-    })
+    });
     zgEngine.on('roomStreamUpdate', async (roomID, updateType, streamList, extendedData) => {
       if (updateType == 'ADD') {
         const streamID = streamList[0].streamID;
@@ -174,21 +182,18 @@ const ChatRoom: React.FC = () => {
     });
 
     if (!streamState.current.session) {
-      throw Error("no sessions available");
+      throw Error('no sessions available');
     }
 
     const session = streamState.current.session;
 
-    zgEngine.loginRoom(session.roomId,
-      session.token,
-      {userID: session.userId}
-    )
+    zgEngine.loginRoom(session.roomId, session.token, { userID: session.userId });
 
     return () => {
       zgEngine.off('roomStateUpdate');
       zgEngine.off('roomStreamUpdate');
-    }
-  }, [chatState])
+    };
+  }, [chatState]);
 
   useEffect(() => {
     if (chatState != ChatState.chatting) {
@@ -196,19 +201,19 @@ const ChatRoom: React.FC = () => {
     }
     // show rating after 1 min
     const showRateTimeout = setTimeout(() => {
-      setRate(rate => {
-        return {rate: rate.rate, showRate: true, rated: rate.rated}
-      })
-    }, 5 * 1000)
+      setRate((rate) => {
+        return { rate: rate.rate, showRate: true, rated: rate.rated };
+      });
+    }, 5 * 1000);
 
     // end chat after 5 min
     const endChatTimeout = setTimeout(() => {
       transitionToDone();
-    }, 300 * 1000)
+    }, 300 * 1000);
 
     zgEngine.on('roomStreamUpdate', async (roomID, updateType, streamList, extendedData) => {
       if (updateType == 'DELETE' && streamState.current.remoteStream) {
-        const streamId = streamState.current.remoteStream.streamId
+        const streamId = streamState.current.remoteStream.streamId;
         zgEngine.stopPlayingStream(streamId);
         transitionToDone();
       }
@@ -218,55 +223,105 @@ const ChatRoom: React.FC = () => {
       clearTimeout(showRateTimeout);
       clearTimeout(endChatTimeout);
       zgEngine.off('roomStreamUpdate');
-      zgEngine.logoutRoom('1')
-    }
-  }, [chatState])
+      zgEngine.logoutRoom('1');
+    };
+  }, [chatState]);
 
   useEffect(() => {
     // count down every second
     let interval = setInterval(() => {
-      setCountdownInSecs(countdownInSecs => countdownInSecs > 0 ? countdownInSecs - 1 : 0);
-    }, 1000)
+      setCountdownInSecs((countdownInSecs) => (countdownInSecs > 0 ? countdownInSecs - 1 : 0));
+    }, 1000);
     return () => clearInterval(interval);
-  }, [countdownInSecs])
+  }, [countdownInSecs]);
 
-  let content = (<div>unexpected state</div>);
+  let content = <div>unexpected state</div>;
 
   if (chatState == ChatState.matching) {
-    content = (<div>matching: {countdownInSecs}
-      <button onClick={() =>  requestSession(user1Config)}>user1</button>
-      <button onClick={() =>  requestSession(user2Config)}>user2</button>
-      <video ref={localVideoRef} autoPlay playsInline/>
-    </div>)
+    content = (
+      <div>
+        matching: {countdownInSecs}
+        <button onClick={() => requestSession(user1Config)}>user1</button>
+        <button onClick={() => requestSession(user2Config)}>user2</button>
+        <video ref={localVideoRef} autoPlay playsInline />
+      </div>
+    );
   }
 
   if (chatState == ChatState.connecting) {
-    content = (<div>
-      <p> connecting </p>
-      <video ref={localVideoRef} autoPlay playsInline/>
-    </div>)
+    content = (
+      <div>
+        <p> connecting </p>
+        <video ref={localVideoRef} autoPlay playsInline />
+      </div>
+    );
   }
 
   if (chatState == ChatState.chatting) {
-    content = (<div>{countdownInSecs}- chatting,
-      <p>{stringify(rate)}</p>
-      <video ref={remoteVideoRef} autoPlay playsInline/>
-      <video ref={localVideoRef} autoPlay playsInline/>
-      <RateComponent rate={rate}/>
-    </div>)
+    content = (
+      <>
+        <div>
+          {countdownInSecs}- chatting,
+          <p>{stringify(rate)}</p>
+        </div>
+        <div className={style.theme_root}>
+          <div className={style.room_root}>
+            <div className={style.room_user_card}>
+              <div className={style.remote_video_card}>
+                <video
+                  className={style.remote_video}
+                  ref={remoteVideoRef}
+                  autoPlay
+                  muted
+                  playsInline
+                />
+                <div className={style.remote_card_wrapper} />
+              </div>
+              <div className={style.local_video_card}>
+                <video
+                  className={style.local_video}
+                  ref={localVideoRef}
+                  autoPlay
+                  muted
+                  playsInline
+                />
+                <div className={style.local_card_wrapper} />
+              </div>
+            </div>
+            <div height="54px">
+              <div className={style.toolbar_root}>
+                <div className={style.toolbar_left_side}>
+                  <div className={style.toolbar_column_center}>
+                    <img src="./imgs/cameraOff.png" className={style.toolbar_button} />
+                    <p className={style.toolbar_button_bottom_text}>Camera</p>
+                  </div>
+                  <div className={style.toolbar_column_center}>
+                    <img src="./imgs/micOff.png" className={style.toolbar_button} />
+                    <p className={style.toolbar_button_bottom_text}>Microphone</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <RateComponent rate={rate} />
+          </div>
+        </div>
+      </>
+    );
   }
 
   if (chatState == ChatState.done) {
-    content = <div><RateComponent rate={rate}/></div>
+    content = (
+      <div>
+        <RateComponent rate={rate} />
+      </div>
+    );
   }
 
   if (chatState == ChatState.failed) {
-    content = <div>failed: {failedReason} </div>
+    content = <div>failed: {failedReason} </div>;
   }
 
-  return (<div>
-    {content}
-  </div>)
-}
+  return <div>{content}</div>;
+};
 
 export default ChatRoom;
