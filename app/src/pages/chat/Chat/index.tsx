@@ -1,6 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { stringify } from 'querystring';
 import { ZegoExpressEngine } from 'zego-express-engine-webrtc';
+import { useModel } from '@@/plugin-model/useModel';
+import { requestSession } from '@/services/chat';
+import { useParams } from 'umi';
+import { OnChainAssetWidget } from '@/pages/chat/OnChainAssetWidget';
 import style from './index.less';
 
 const zgEngine = new ZegoExpressEngine(573234333, 'wss://webliveroom573234333-api.imzego.com/ws');
@@ -10,6 +13,7 @@ const user1Config = {
     '03AAAAAGJXwPoAEHp6cjE5eTI3cm94Y3hoZjgAoHGsK9co7SsgozK0M8aZEcuL21wnDPhQnPfpG17j4xvC4HglNr6xMQZ7k/FwwujXobVzQRuoHRt+AoIlbK8oinVGoYBi9G/zLnZ1Mq6nUsWctSQe2i3/WOK7R7slaRD9AYX6YM1pT7bR+ehVoonj5FD0bY/ouKHf1C7DPC0EUryFM4ANYq7P8nHr7dKp31uVNjl9Q273AeUX+Hbuayb5mb0=',
   user: { userID: 'user1' },
 };
+
 const user2Config = {
   token:
     '03AAAAAGJXwSIAEGlweWRrMGRkMnV0dnFnanEAoAGZkFYFrxB/ercAOAsxGqciOGGE7YKw9+p//JyMWS+xT4/f6QZDVqg3s5/brmlYUMfNgsy67qrzNkZcWe66sB7GUal33cmdNpLTcyNvF86nuW5xJtqJeh7gFEE35wnoq0SJ1dK28J46JJI8ljVSTaKKs2flWynapFeZ59cRgiumKQlPUUV4UbbKyoJge1ANn9pE2bUwC8cYlzy1lZYlyLg=',
@@ -35,12 +39,14 @@ interface ChatSession {
   userId: string;
   roomId: string;
   userName?: string;
+  peerAccount: string;
+  peerUserId: string;
+  peerUserName?: string;
 }
 
 interface VideoStreamState {
   remoteStream?: MediaStream;
   localStream?: MediaStream;
-  session?: ChatSession;
   pushStreamReady?: boolean;
   pullStreamReady?: boolean;
 }
@@ -52,8 +58,17 @@ interface RateInfo {
 }
 
 const ChatRoom: React.FC = () => {
+  const { V2EContract, Account } = useModel('V2EContract');
+
   const [countdownInSecs, setCountdownInSecs] = useState(0);
   const [chatState, setChatState] = useState(ChatState.preparing);
+  const [chatSession, setChatSession] = useState<ChatSession>({
+    token: '',
+    userId: '',
+    roomId: '',
+    peerUserId: '',
+    peerAccount: '',
+  });
 
   const [rate, setRate] = useState<RateInfo>({
     rate: ChatRate.good,
@@ -66,6 +81,8 @@ const ChatRoom: React.FC = () => {
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
 
   const [failedReason, setFailedReason] = useState<string>('');
+
+  const params = useParams<{ channel: string }>();
 
   useEffect(() => {
     if (!streamState.current.localStream) {
@@ -86,6 +103,13 @@ const ChatRoom: React.FC = () => {
       (chatState == ChatState.failed || chatState == ChatState.done)
     ) {
       zgEngine.destroyStream(streamState.current.localStream);
+      console.log('stream destroyed');
+    }
+    if (localVideoRef.current != null && streamState.current.localStream != null) {
+      localVideoRef.current.srcObject = streamState.current.localStream;
+    }
+    if (remoteVideoRef.current != null && streamState.current.remoteStream != null) {
+      remoteVideoRef.current.srcObject = streamState.current.remoteStream;
     }
   }, [chatState]);
 
@@ -103,21 +127,14 @@ const ChatRoom: React.FC = () => {
         </div>
       );
     }
-
     return <div> rate: {rate.rate == 0 ? 'Good' : 'Bad'} </div>;
   }
 
-  useEffect(() => {
-    if (localVideoRef.current != null && streamState.current.localStream != null) {
-      localVideoRef.current.srcObject = streamState.current.localStream;
-    }
-    if (remoteVideoRef.current != null && streamState.current.remoteStream != null) {
-      remoteVideoRef.current.srcObject = streamState.current.remoteStream;
-    }
-  }, [chatState]);
-
-  function requestSession(user: any) {
-    streamState.current.session = { userId: user.user.userID, token: user.token, roomId: '1' };
+  function mockSession(user: any) {
+    console.log('mock user is {}', user);
+    setChatSession((session) => {
+      return { ...session, userId: user.user.userID, roomId: '1', token: user.token };
+    });
     transitionToConnecting();
   }
 
@@ -128,9 +145,15 @@ const ChatRoom: React.FC = () => {
     }
   }
 
+  function transitionToMatching() {
+    setChatState(ChatState.matching);
+    setCountdownInSecs(5);
+  }
+
   function transitionToConnecting() {
     setChatState(ChatState.connecting);
     setCountdownInSecs(0);
+    console.log('transition to connecting');
   }
 
   function tryTransitionToChatting() {
@@ -139,6 +162,7 @@ const ChatRoom: React.FC = () => {
     }
     setChatState(ChatState.chatting);
     setCountdownInSecs(300);
+    console.log('transition to chatting');
   }
 
   function transitionToDone() {
@@ -146,15 +170,49 @@ const ChatRoom: React.FC = () => {
     setCountdownInSecs(0);
   }
 
-  function transitionToFailed(reason: Error) {
+  function transitionToFailed(reason: Error & { msg?: string }) {
     setChatState(ChatState.failed);
-    setFailedReason(reason.toString());
+    setFailedReason(reason.msg || reason.message);
   }
 
+  // prepare and check states
   useEffect(() => {
-    if (chatState != ChatState.matching) {
+    if (chatState != ChatState.preparing) {
       return;
     }
+    // TODO: disable checks for testing.
+    // if (!V2EContract || !Account) {
+    //   transitionToFailed(new Error("no contract or account available"));
+    //   return;
+    // }
+    //
+    // if (!params.channel) {
+    //   transitionToFailed(new Error("no channel selected"));
+    //   return;
+    // }
+
+    const promises = [];
+    if (!streamState.current.localStream) {
+      zgEngine.setLogConfig({ logLevel: 'error' });
+      promises.push(
+        zgEngine.createStream().then((stream) => {
+          streamState.current.localStream = stream;
+        }),
+      );
+    }
+
+    promises.push(
+      requestSession(Account, params.channel, 5).then((sessionResponse) => {
+        const chatSession: ChatSession = {
+          ...sessionResponse,
+        };
+        setChatSession(chatSession);
+      }),
+    );
+
+    Promise.all(promises)
+      .then(() => transitionToMatching())
+      .catch((err) => transitionToFailed(err));
   }, [chatState]);
 
   useEffect(() => {
@@ -181,13 +239,7 @@ const ChatRoom: React.FC = () => {
       }
     });
 
-    if (!streamState.current.session) {
-      throw Error('no sessions available');
-    }
-
-    const session = streamState.current.session;
-
-    zgEngine.loginRoom(session.roomId, session.token, { userID: session.userId });
+    zgEngine.loginRoom(chatSession.roomId, chatSession.token, { userID: chatSession.userId });
 
     return () => {
       zgEngine.off('roomStateUpdate');
@@ -213,6 +265,7 @@ const ChatRoom: React.FC = () => {
 
     zgEngine.on('roomStreamUpdate', async (roomID, updateType, streamList, extendedData) => {
       if (updateType == 'DELETE' && streamState.current.remoteStream) {
+        //@ts-ignore
         const streamId = streamState.current.remoteStream.streamId;
         zgEngine.stopPlayingStream(streamId);
         transitionToDone();
@@ -241,8 +294,8 @@ const ChatRoom: React.FC = () => {
     content = (
       <div>
         matching: {countdownInSecs}
-        <button onClick={() => requestSession(user1Config)}>user1</button>
-        <button onClick={() => requestSession(user2Config)}>user2</button>
+        <button onClick={() => mockSession(user1Config)}>user1</button>
+        <button onClick={() => mockSession(user2Config)}>user2</button>
         <video ref={localVideoRef} autoPlay playsInline />
       </div>
     );
@@ -260,10 +313,7 @@ const ChatRoom: React.FC = () => {
   if (chatState == ChatState.chatting) {
     content = (
       <>
-        <div>
-          {countdownInSecs}- chatting,
-          <p>{stringify(rate)}</p>
-        </div>
+        <div>{countdownInSecs}- chatting,</div>
         <div className={style.theme_root}>
           <div className={style.room_root}>
             <div className={style.room_user_card}>
@@ -321,7 +371,12 @@ const ChatRoom: React.FC = () => {
     content = <div>failed: {failedReason} </div>;
   }
 
-  return <div>{content}</div>;
+  return (
+    <div>
+      <OnChainAssetWidget account={'0x8b684993d03cc484936cf3a688ddc9937244f1d3'} />
+      {content}
+    </div>
+  );
 };
 
 export default ChatRoom;
