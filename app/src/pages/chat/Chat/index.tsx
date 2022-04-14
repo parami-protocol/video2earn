@@ -367,15 +367,13 @@ const ChatRoom: React.FC = () => {
               <LocalVideoWidget videoStream={streamState.current.localStream} />
             </div>
             <div className={style.toolbar_root}>
-              <div className={style.toolbar_left_side}>
-                <div className={style.toolbar_column_center}>
-                  <img src="./imgs/cameraOff.png" className={style.toolbar_button} />
-                  <p className={style.toolbar_button_bottom_text}>Camera</p>
-                </div>
-                <div className={style.toolbar_column_center}>
-                  <img src="./imgs/micOff.png" className={style.toolbar_button} />
-                  <p className={style.toolbar_button_bottom_text}>Microphone</p>
-                </div>
+              <div className={style.toolbar_column_center}>
+                <img src="./imgs/cameraOff.png" className={style.toolbar_button} />
+                <p className={style.toolbar_button_bottom_text}>Camera</p>
+              </div>
+              <div className={style.toolbar_column_center}>
+                <img src="./imgs/micOff.png" className={style.toolbar_button} />
+                <p className={style.toolbar_button_bottom_text}>Microphone</p>
               </div>
             </div>
             <RateComponent rate={rate} />
