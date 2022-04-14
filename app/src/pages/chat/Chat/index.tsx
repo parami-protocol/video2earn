@@ -73,7 +73,6 @@ const LocalVideoWidget = ({ videoStream }: { videoStream?: MediaStream }) => {
   return (
     <div className={style.local_video_card}>
       <video className={style.local_video} ref={localVideoRef} autoPlay muted playsInline />
-      <div className={style.local_card_wrapper} />
     </div>
   );
 };
@@ -94,7 +93,6 @@ const RemoteVideoWidget = ({ videoStream }: { videoStream?: MediaStream }) => {
   return (
     <div className={style.remote_video_card}>
       <video className={style.remote_video} ref={remoteVideoRef} autoPlay muted playsInline />
-      <div className={style.remote_card_wrapper} />
     </div>
   );
 };
