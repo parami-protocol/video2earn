@@ -45,7 +45,7 @@ export const OnChainERC20Widget = ({ account }: { account: string }) => {
 
   const erc20Content = accountBalances.map((ab) => {
     return (
-      <div className={styles.toolbar_column_center} key={ab.symbol}>
+      <div className={styles.coin_card} key={ab.symbol}>
         <div className={styles.coin_img_container}>
           <img src={ab.img} className={styles.coin_item_img} alt={ab.name} />
         </div>
@@ -58,7 +58,7 @@ export const OnChainERC20Widget = ({ account }: { account: string }) => {
 
   return (
     <div className={styles.coin_root}>
-      <div className={styles.coin_tooltip}>{erc20Content}</div>
+      {erc20Content}
     </div>
   );
 };
