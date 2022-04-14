@@ -3,20 +3,20 @@ import { ZegoExpressEngine } from 'zego-express-engine-webrtc';
 import { useModel } from '@@/plugin-model/useModel';
 import { requestSession } from '@/services/chat';
 import { useParams } from 'umi';
-import { OnChainAssetWidget } from '@/pages/chat/OnChainAssetWidget';
+import { OnChainERC20Widget, OnChainERC721Widget } from '@/pages/chat/OnChainAssetWidget';
 import style from './index.less';
 
 const zgEngine = new ZegoExpressEngine(573234333, 'wss://webliveroom573234333-api.imzego.com/ws');
 
 const user1Config = {
   token:
-    '03AAAAAGJXwPoAEHp6cjE5eTI3cm94Y3hoZjgAoHGsK9co7SsgozK0M8aZEcuL21wnDPhQnPfpG17j4xvC4HglNr6xMQZ7k/FwwujXobVzQRuoHRt+AoIlbK8oinVGoYBi9G/zLnZ1Mq6nUsWctSQe2i3/WOK7R7slaRD9AYX6YM1pT7bR+ehVoonj5FD0bY/ouKHf1C7DPC0EUryFM4ANYq7P8nHr7dKp31uVNjl9Q273AeUX+Hbuayb5mb0=',
+    '03AAAAAGJZHQsAEHN5bzFjeGxyMnN6ZDQzc24AoFJouE+a2UmZlaCKytv1fhh+2Jk7re5DC97qalIn9Mgk7lc97eDRTipGPMg+eupJLTRlhFdXV0RgdxbseG+FIpDtpVFnZJuQifwheXvz5u1TXXMjPIk9PqrX3pHVYKIQC/dWNVWPgAoBjxuw+BBf+/fzoqDkP7FYvjDPPp6LmbILceDdHiU0tjZt27tPXl/qS3fUsw4zK2xCx25um+D3L3U=',
   user: { userID: 'user1' },
 };
 
 const user2Config = {
   token:
-    '03AAAAAGJXwSIAEGlweWRrMGRkMnV0dnFnanEAoAGZkFYFrxB/ercAOAsxGqciOGGE7YKw9+p//JyMWS+xT4/f6QZDVqg3s5/brmlYUMfNgsy67qrzNkZcWe66sB7GUal33cmdNpLTcyNvF86nuW5xJtqJeh7gFEE35wnoq0SJ1dK28J46JJI8ljVSTaKKs2flWynapFeZ59cRgiumKQlPUUV4UbbKyoJge1ANn9pE2bUwC8cYlzy1lZYlyLg=',
+    '03AAAAAGJZHTAAEGZlbmgzaWdnZnR5Y2Z3OTQAoF5SAuYLP0fnvbeNmlN64ivqaQJfw3WJyvYPqj1jOuIB9X5+qjv7oWaUQmBdvbwSX3oWTp2pLquWVz2lnSpVBtY28bH09TUtJIdnqtnfzmwyjAE1W8HpeJu+S10vu44eID5qvBbmVMywLcDrvr4L44yi6ln+vT7l9qT0QM3NxUVUDyeiFLwhCPMNCgnPCuD/bupR8rtmrw2kdwPLN8VjFgE=',
   user: { userID: 'user2' },
 };
 
@@ -57,6 +57,48 @@ interface RateInfo {
   showRate: boolean;
 }
 
+const LocalVideoWidget = ({ videoStream }: { videoStream?: MediaStream }) => {
+  if (!videoStream) {
+    return null;
+  }
+
+  const localVideoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    if (localVideoRef.current) {
+      localVideoRef.current.srcObject = videoStream;
+    }
+  }, [videoStream]);
+
+  return (
+    <div className={style.local_video_card}>
+      <video className={style.local_video} ref={localVideoRef} autoPlay muted playsInline />
+      <div className={style.local_card_wrapper} />
+    </div>
+  );
+};
+
+const RemoteVideoWidget = ({ videoStream }: { videoStream?: MediaStream }) => {
+  if (!videoStream) {
+    return null;
+  }
+
+  const remoteVideoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    if (remoteVideoRef.current) {
+      remoteVideoRef.current.srcObject = videoStream;
+    }
+  }, [videoStream]);
+
+  return (
+    <div className={style.remote_video_card}>
+      <video className={style.remote_video} ref={remoteVideoRef} autoPlay muted playsInline />
+      <div className={style.remote_card_wrapper} />
+    </div>
+  );
+};
+
 const ChatRoom: React.FC = () => {
   //@ts-ignore
   const { V2EContract, Account } = useModel('V2EContract');
@@ -77,9 +119,6 @@ const ChatRoom: React.FC = () => {
     showRate: false,
   });
   const streamState = useRef<VideoStreamState>({});
-
-  const localVideoRef = useRef<HTMLVideoElement>(null);
-  const remoteVideoRef = useRef<HTMLVideoElement>(null);
 
   const [failedReason, setFailedReason] = useState<string>('');
 
@@ -105,12 +144,6 @@ const ChatRoom: React.FC = () => {
     ) {
       zgEngine.destroyStream(streamState.current.localStream);
       console.log('stream destroyed');
-    }
-    if (localVideoRef.current != null && streamState.current.localStream != null) {
-      localVideoRef.current.srcObject = streamState.current.localStream;
-    }
-    if (remoteVideoRef.current != null && streamState.current.remoteStream != null) {
-      remoteVideoRef.current.srcObject = streamState.current.remoteStream;
     }
   }, [chatState]);
 
@@ -312,7 +345,7 @@ const ChatRoom: React.FC = () => {
         matching: {countdownInSecs}
         <button onClick={() => mockSession(user1Config)}>user1</button>
         <button onClick={() => mockSession(user2Config)}>user2</button>
-        <video ref={localVideoRef} autoPlay playsInline />
+        <LocalVideoWidget videoStream={streamState.current.localStream} />
       </div>
     );
   }
@@ -321,7 +354,7 @@ const ChatRoom: React.FC = () => {
     content = (
       <div>
         <p> connecting </p>
-        <video ref={localVideoRef} autoPlay playsInline />
+        <LocalVideoWidget videoStream={streamState.current.localStream} />
       </div>
     );
   }
@@ -329,44 +362,11 @@ const ChatRoom: React.FC = () => {
   if (chatState == ChatState.chatting) {
     content = (
       <>
-        <div>{countdownInSecs}- chatting,</div>
         <div className={style.theme_root}>
           <div className={style.room_root}>
             <div className={style.room_user_card}>
-              <div className={style.remote_video_card}>
-                <video
-                  className={style.remote_video}
-                  ref={remoteVideoRef}
-                  autoPlay
-                  muted
-                  playsInline
-                />
-                <div className={style.remote_card_wrapper} />
-              </div>
-              <div className={style.local_video_card}>
-                <video
-                  className={style.local_video}
-                  ref={localVideoRef}
-                  autoPlay
-                  muted
-                  playsInline
-                />
-                <div className={style.local_card_wrapper} />
-              </div>
-            </div>
-            <div className={style.coin_root}>
-              <div className={style.toolbar_column_center}>
-                <img src="./imgs/btc.png" className={style.coin_item_img} />
-                <p className={style.coin_item_value_text}>20</p>
-              </div>
-              <div className={style.toolbar_column_center}>
-                <img src="./imgs/eth.png" className={style.coin_item_img} />
-                <p className={style.coin_item_value_text}>1000</p>
-              </div>
-              <div className={style.toolbar_column_center}>
-                <img src="./imgs/usdt.png" className={style.coin_item_img} />
-                <p className={style.coin_item_value_text}>20000</p>
-              </div>
+              <RemoteVideoWidget videoStream={streamState.current.remoteStream} />
+              <LocalVideoWidget videoStream={streamState.current.localStream} />
             </div>
             <div className={style.toolbar_root}>
               <div className={style.toolbar_left_side}>
@@ -401,7 +401,8 @@ const ChatRoom: React.FC = () => {
 
   return (
     <div>
-      <OnChainAssetWidget account={'0x8b684993d03cc484936cf3a688ddc9937244f1d3'} />
+      <OnChainERC721Widget account={'0x8b684993d03cc484936cf3a688ddc9937244f1d3'} />
+      <OnChainERC20Widget account={'0xd8da6bf26964af9d7eed9e03e53415d37aa96045'} />
       {content}
     </div>
   );

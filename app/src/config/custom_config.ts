@@ -19,7 +19,7 @@ export const openSeaEndpoint = 'https://testnets-api.opensea.io';
 
 export const etherscanConfig = {
   endpoint: 'https://api.etherscan.io/api',
-  apiKey: 'G5IZJQGRVT5KDR8718WQX5B71DMFK3MT8S',
+  apiKey: 'AUXAI7C81WNTM24SMTYFCGC853HX47VJPW',
 };
 
 export const erc20contracts = [
@@ -28,11 +28,13 @@ export const erc20contracts = [
     name: 'Tether USD',
     symbol: 'USDT',
     decimal: 10e6,
+    img: './imgs/usdt.png',
   },
   {
-    address: '0xB8c77482e45F1F44dE1745F52C74426C631bDD52',
-    name: 'BNB',
-    symbol: 'BNB',
-    decimal: 10e18,
+    address: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599',
+    name: 'Wrapped BTC',
+    symbol: 'WBTC',
+    decimal: 10e8,
+    img: './imgs/btc.png',
   },
 ];
