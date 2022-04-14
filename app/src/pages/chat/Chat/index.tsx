@@ -5,6 +5,7 @@ import { requestSession } from '@/services/chat';
 import { useParams } from 'umi';
 import { OnChainERC20Widget, OnChainERC721Widget } from '@/pages/chat/OnChainAssetWidget';
 import style from './index.less';
+import { Rate, RateWidget } from '@/pages/chat/RateWidget';
 
 const zgEngine = new ZegoExpressEngine(573234333, 'wss://webliveroom573234333-api.imzego.com/ws');
 
@@ -29,11 +30,6 @@ enum ChatState {
   failed,
 }
 
-enum ChatRate {
-  good,
-  bad,
-}
-
 interface ChatSession {
   token: string;
   userId: string;
@@ -52,9 +48,8 @@ interface VideoStreamState {
 }
 
 interface RateInfo {
-  rate: ChatRate;
-  rated: boolean;
   showRate: boolean;
+  rate?: Rate;
 }
 
 const LocalVideoWidget = ({ videoStream }: { videoStream?: MediaStream }) => {
@@ -111,11 +106,8 @@ const ChatRoom: React.FC = () => {
     peerAccount: '',
   });
 
-  const [rate, setRate] = useState<RateInfo>({
-    rate: ChatRate.good,
-    rated: false,
-    showRate: false,
-  });
+  const [rateInfo, setRateInfo] = useState<RateInfo>({ showRate: false });
+
   const streamState = useRef<VideoStreamState>({});
 
   const [failedReason, setFailedReason] = useState<string>('');
@@ -145,23 +137,6 @@ const ChatRoom: React.FC = () => {
     }
   }, [chatState]);
 
-  function RateComponent(prop: any) {
-    const rate = prop.rate;
-    if (!rate.showRate) {
-      return null;
-    }
-
-    if (!rate.rated) {
-      return (
-        <div>
-          <button onClick={() => rateUser(ChatRate.good)}>Good</button>
-          <button onClick={() => rateUser(ChatRate.bad)}>Bad</button>
-        </div>
-      );
-    }
-    return <div> rate: {rate.rate == 0 ? 'Good' : 'Bad'} </div>;
-  }
-
   function mockSession(user: any) {
     console.log('mock user is {}', user);
     setChatSession((session) => {
@@ -170,9 +145,11 @@ const ChatRoom: React.FC = () => {
     transitionToConnecting();
   }
 
-  function rateUser(rate: ChatRate) {
-    setRate({ rate: rate, rated: true, showRate: true });
-    if (rate == ChatRate.bad) {
+  function onRate(rate: Rate) {
+    setRateInfo((rateInfo) => {
+      return { ...rateInfo, rate: rate };
+    });
+    if (rate == Rate.BAD) {
       transitionToDone();
     }
   }
@@ -300,9 +277,7 @@ const ChatRoom: React.FC = () => {
     }
     // show rating after 1 min
     const showRateTimeout = setTimeout(() => {
-      setRate((rate) => {
-        return { rate: rate.rate, showRate: true, rated: rate.rated };
-      });
+      setRateInfo({ showRate: true });
     }, 5 * 1000);
 
     // end chat after 5 min
@@ -376,7 +351,9 @@ const ChatRoom: React.FC = () => {
                 <p className={style.toolbar_button_bottom_text}>Microphone</p>
               </div>
             </div>
-            <RateComponent rate={rate} />
+            <OnChainERC721Widget account={'0x8b684993d03cc484936cf3a688ddc9937244f1d3'} />
+            <OnChainERC20Widget account={'0xd8da6bf26964af9d7eed9e03e53415d37aa96045'} />
+            <RateWidget showRate={rateInfo.showRate} rate={rateInfo.rate} onRated={onRate} />
           </div>
         </div>
       </>
@@ -384,24 +361,14 @@ const ChatRoom: React.FC = () => {
   }
 
   if (chatState == ChatState.done) {
-    content = (
-      <div>
-        <RateComponent rate={rate} />
-      </div>
-    );
+    content = <div>done</div>;
   }
 
   if (chatState == ChatState.failed) {
     content = <div>failed: {failedReason} </div>;
   }
 
-  return (
-    <div>
-      <OnChainERC721Widget account={'0x8b684993d03cc484936cf3a688ddc9937244f1d3'} />
-      <OnChainERC20Widget account={'0xd8da6bf26964af9d7eed9e03e53415d37aa96045'} />
-      {content}
-    </div>
-  );
+  return <div>{content}</div>;
 };
 
 export default ChatRoom;
