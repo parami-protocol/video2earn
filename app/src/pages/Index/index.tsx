@@ -5,6 +5,7 @@ import { useModel } from 'umi';
 import type { BigNumber } from 'ethers';
 import { selectTokenWithCriteriaExistOfCurUser } from '@/services/contract/V2EService';
 import { message } from 'antd';
+import { history } from 'umi';
 
 const { Meta } = Card;
 
@@ -21,6 +22,10 @@ const Index: React.FC = () => {
       throw new Error('no v2e contract found');
     }
 
+    if (!selectedChannel) {
+      throw new Error('please select a channel');
+    }
+
     const selectedTokenId = await selectTokenWithCriteriaExistOfCurUser(
       V2EContract,
       Account,
@@ -28,7 +33,19 @@ const Index: React.FC = () => {
         return nftInfo[0].gt(0) && nftInfo[1] == parseInt(selectedChannel as string);
       },
     );
+
+    if (!selectedTokenId) {
+      throw new Error('no tokenId selected');
+    }
+
     console.log('enter channel: ', selectedChannel, ', with selectTokenId: ', selectedTokenId);
+    history.push({
+      pathname: '/chat-room',
+      query: {
+        channel: selectedChannel.toString(),
+        tokenId: selectedTokenId.toString(),
+      },
+    });
   };
 
   const channelCards = ['business channel', 'social channel'].map((name, i) => (
