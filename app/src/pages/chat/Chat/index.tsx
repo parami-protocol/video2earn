@@ -11,13 +11,13 @@ const zgEngine = new ZegoExpressEngine(573234333, 'wss://webliveroom573234333-ap
 
 const user1Config = {
   token:
-    '03AAAAAGJZHQsAEHN5bzFjeGxyMnN6ZDQzc24AoFJouE+a2UmZlaCKytv1fhh+2Jk7re5DC97qalIn9Mgk7lc97eDRTipGPMg+eupJLTRlhFdXV0RgdxbseG+FIpDtpVFnZJuQifwheXvz5u1TXXMjPIk9PqrX3pHVYKIQC/dWNVWPgAoBjxuw+BBf+/fzoqDkP7FYvjDPPp6LmbILceDdHiU0tjZt27tPXl/qS3fUsw4zK2xCx25um+D3L3U=',
+    '03AAAAAGJacbAAEGEyajU5OHp3MXVucXZkNDQAoHKSEwPXTkpuS7CglJoz1D7TtoaL8h3Ro8ZVeCgeSPr1m8iwIbBoRTWcgbq3dvdPKXInZDwWY18uyROK2KLITDpgbL0Ynj9X19a8grNfe+NX3HHWoPQJ1K4GZkFmXDUQ4MyenAV51w8OT0je09odCZsR+aSIHQfkcF5qvYDwUGuY2EKBpySk8sG2NAX4ssyOejq+jTgE6YinqbiE4lKkeZg=',
   user: { userID: 'user1' },
 };
 
 const user2Config = {
   token:
-    '03AAAAAGJZHTAAEGZlbmgzaWdnZnR5Y2Z3OTQAoF5SAuYLP0fnvbeNmlN64ivqaQJfw3WJyvYPqj1jOuIB9X5+qjv7oWaUQmBdvbwSX3oWTp2pLquWVz2lnSpVBtY28bH09TUtJIdnqtnfzmwyjAE1W8HpeJu+S10vu44eID5qvBbmVMywLcDrvr4L44yi6ln+vT7l9qT0QM3NxUVUDyeiFLwhCPMNCgnPCuD/bupR8rtmrw2kdwPLN8VjFgE=',
+    '03AAAAAGJacc8AEGRlYnJwemh1ZGJpMGJqbmEAoHDQ+k76LqCoF5AcgeCbyImT78MCOW5JbjmdxtqT6EWv252Dd6zth489RW7qnJTIoXRGj3+gMthRsEnEgasICg/bLMI5ka37CrsbAjJTodWEwqFVXL+uRknYUhRUkqjzuzZZqWBqfDLoBn7sFRc4jWgbCx08g7AK+ECGsCQm9FFYanUoiPlZyL5yWWZevvN7n9rmTKAjBodw9GM22Ck5oCs=',
   user: { userID: 'user2' },
 };
 
@@ -302,9 +302,15 @@ const ChatRoom: React.FC = () => {
   if (chatState == ChatState.matching) {
     content = (
       <div>
-        matching: {countdownInSecs}
-        <button onClick={() => mockSession(user1Config)}>user1</button>
-        <button onClick={() => mockSession(user2Config)}>user2</button>
+        <div>
+          mocked:
+          <button onClick={() => mockSession(user1Config)}>user1</button>
+          <button onClick={() => mockSession(user2Config)}>user2</button>
+        </div>
+        <div className={style.matching_container}>
+          <div className={style.matching_text}>MATCHING...</div>
+          <div className={style.matching_countdown}>{countdownInSecs}</div>
+        </div>
         <LocalVideoWidget videoStream={streamState.current.localStream} />
       </div>
     );
