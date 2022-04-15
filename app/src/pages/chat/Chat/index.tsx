@@ -6,6 +6,8 @@ import { useParams } from 'umi';
 import { OnChainERC20Widget, OnChainERC721Widget } from '@/pages/chat/OnChainAssetWidget';
 import style from './index.less';
 import { Rate, RateWidget } from '@/pages/chat/RateWidget';
+import { Button } from 'antd';
+import { history } from 'umi';
 
 const zgEngine = new ZegoExpressEngine(573234333, 'wss://webliveroom573234333-api.imzego.com/ws');
 
@@ -188,14 +190,14 @@ const ChatRoom: React.FC = () => {
     // }
 
     const promises = [];
-    if (!streamState.current.localStream) {
-      zgEngine.setLogConfig({ logLevel: 'error' });
-      promises.push(
-        zgEngine.createStream().then((stream) => {
-          streamState.current.localStream = stream;
-        }),
-      );
-    }
+    // clear states
+    streamState.current = {};
+    zgEngine.setLogConfig({ logLevel: 'error' });
+    promises.push(
+      zgEngine.createStream().then((stream) => {
+        streamState.current.localStream = stream;
+      }),
+    );
 
     Promise.all(promises)
       .then(() => transitionToMatching())
@@ -354,7 +356,24 @@ const ChatRoom: React.FC = () => {
   }
 
   if (chatState == ChatState.done) {
-    content = <div>done</div>;
+    content = (
+      <div>
+        <Button
+          onClick={() => {
+            history.push('/');
+          }}
+        >
+          Back To Home
+        </Button>
+        <Button
+          onClick={() => {
+            setChatState(ChatState.preparing);
+          }}
+        >
+          Start Again{' '}
+        </Button>
+      </div>
+    );
   }
 
   if (chatState == ChatState.failed) {
