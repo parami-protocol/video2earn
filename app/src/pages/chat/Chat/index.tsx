@@ -115,19 +115,6 @@ const ChatRoom: React.FC = () => {
   const params = useParams<{ channel: string }>();
 
   useEffect(() => {
-    if (!streamState.current.localStream) {
-      zgEngine.setLogConfig({ logLevel: 'error' });
-      zgEngine
-        .createStream()
-        .then((stream) => {
-          streamState.current.localStream = stream;
-          setChatState(ChatState.matching);
-          setCountdownInSecs(5);
-        })
-        .catch((reason) => {
-          transitionToFailed(reason);
-        });
-    }
     if (
       streamState.current.localStream &&
       (chatState == ChatState.failed || chatState == ChatState.done)
