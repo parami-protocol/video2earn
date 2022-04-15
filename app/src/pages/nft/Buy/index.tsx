@@ -22,7 +22,7 @@ const BuyNFT: React.FC = () => {
       >
         <Meta title={name} description="www.instagram.com" />
       </Card>
-      <Button type="primary" size="large" onClick={() => buyNFT(i)}>
+      <Button type="primary" size="large" onClick={() => buyNFT(i + 1)}>
         Buy
       </Button>
     </Col>

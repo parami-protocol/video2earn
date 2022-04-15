@@ -6,11 +6,15 @@ import type { BigNumber } from 'ethers';
 import { selectTokenWithCriteriaExistOfCurUser } from '@/services/contract/V2EService';
 import { message } from 'antd';
 import { history } from 'umi';
+import { useState } from 'react';
 
 const { Meta } = Card;
 
 const Index: React.FC = () => {
   const { V2EContract, Account } = useModel('V2EContract');
+
+  const [clicked, setClicked] = useState(false);
+  const [selectedChannel, setSelectedChannel] = useState<CheckGroupValueType>(1);
 
   const enterChannel = async (selectedChannel: CheckGroupValueType) => {
     //TODO(ironman_ch): add pre-check if user has corresponding nft
@@ -34,8 +38,9 @@ const Index: React.FC = () => {
       },
     );
 
+    console.log('selectedTokenId', selectedTokenId);
     if (!selectedTokenId) {
-      throw new Error('no tokenId selected');
+      throw new Error('no nft available');
     }
 
     console.log('enter channel: ', selectedChannel, ', with selectTokenId: ', selectedTokenId);
@@ -55,14 +60,12 @@ const Index: React.FC = () => {
         cover={
           <img alt="example" src="https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png" />
         }
-        value={i}
+        value={i + 1}
       >
         <Meta title={name} description="www.instagram.com" />
       </CheckCard>
     </Col>
   ));
-
-  let selectedChannel: CheckGroupValueType = '0';
 
   return (
     <>
@@ -71,7 +74,7 @@ const Index: React.FC = () => {
           <CheckCard.Group
             onChange={(value) => {
               console.log('value', value);
-              selectedChannel = value;
+              setSelectedChannel(value);
             }}
             defaultValue={selectedChannel}
           >
@@ -82,11 +85,14 @@ const Index: React.FC = () => {
           <Button
             type="primary"
             size="large"
-            onClick={() =>
+            loading={clicked}
+            onClick={() => {
+              setClicked(true);
               enterChannel(selectedChannel).catch((error) => {
+                setClicked(false);
                 message.error(error.message);
-              })
-            }
+              });
+            }}
           >
             Let's Chat
           </Button>
