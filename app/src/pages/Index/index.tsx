@@ -4,6 +4,7 @@ import type { CheckGroupValueType } from '@ant-design/pro-card/lib/components/Ch
 import { useModel } from 'umi';
 import type { BigNumber } from 'ethers';
 import { selectTokenWithCriteriaExistOfCurUser } from '@/services/contract/V2EService';
+import { message } from 'antd';
 
 const { Meta } = Card;
 
@@ -12,6 +13,14 @@ const Index: React.FC = () => {
 
   const enterChannel = async (selectedChannel: CheckGroupValueType) => {
     //TODO(ironman_ch): add pre-check if user has corresponding nft
+    if (!Account) {
+      throw new Error('wallet not connected');
+    }
+
+    if (!V2EContract) {
+      throw new Error('no v2e contract found');
+    }
+
     const selectedTokenId = await selectTokenWithCriteriaExistOfCurUser(
       V2EContract,
       Account,
@@ -53,7 +62,15 @@ const Index: React.FC = () => {
           </CheckCard.Group>
         </Row>
         <Row type="flex" justify="center">
-          <Button type="primary" size="large" onClick={() => enterChannel(selectedChannel)}>
+          <Button
+            type="primary"
+            size="large"
+            onClick={() =>
+              enterChannel(selectedChannel).catch((error) => {
+                message.error(error.message);
+              })
+            }
+          >
             Let's Chat
           </Button>
         </Row>
