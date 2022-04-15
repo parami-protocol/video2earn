@@ -43,6 +43,10 @@ export const OnChainERC20Widget = ({ account }: { account: string }) => {
     });
   }, []);
 
+  if (!accountBalances) {
+    return null;
+  }
+
   const erc20Content = accountBalances.map((ab) => {
     return (
       <div className={styles.coin_card} key={ab.symbol}>
@@ -56,11 +60,7 @@ export const OnChainERC20Widget = ({ account }: { account: string }) => {
     );
   });
 
-  return (
-    <div className={styles.coin_root}>
-      {erc20Content}
-    </div>
-  );
+  return <div className={styles.coin_root}>{erc20Content}</div>;
 };
 
 export const OnChainERC721Widget = ({ account }: { account: string }) => {
@@ -75,6 +75,10 @@ export const OnChainERC721Widget = ({ account }: { account: string }) => {
       setAssets(assets);
     });
   }, []);
+
+  if (!assets) {
+    return null;
+  }
 
   const asset_content = assets.assets.flatMap((asset, index) => {
     if (!asset.image_url) {
