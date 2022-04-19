@@ -27,7 +27,7 @@ app.use(function(req, res, next) {
   next(createError(404));
 });
 
-app.listen(6699, () => {
+app.listen(80, () => {
   console.log('started');
 })
 
