@@ -2,26 +2,25 @@ import React, { useEffect, useRef, useState } from 'react';
 import { ZegoExpressEngine } from 'zego-express-engine-webrtc';
 import { useModel } from '@@/plugin-model/useModel';
 import { requestSession } from '@/services/chat';
-import { useParams } from 'umi';
+import { useHistory } from 'umi';
 import { OnChainERC20Widget, OnChainERC721Widget } from '@/pages/chat/OnChainAssetWidget';
 import style from './index.less';
 import { Rate, RateWidget } from '@/pages/chat/RateWidget';
 import { Button } from 'antd';
-import { history } from 'umi';
 
 const zgEngine = new ZegoExpressEngine(573234333, 'wss://webliveroom573234333-api.imzego.com/ws');
 
-const user1Config = {
-  token:
-    '03AAAAAGJejs8AEGdsNGNubW42bmJkM3RzNjQAoI6M09ogWIqlCTBB/86KjXDmOEd8wJgWPboB542shOYZ0uqqRQY/JpS5lz8ZZ5W7URN3a4BIv94WUExV+AimuN6c/cUgzUG6J608QgDWGaRdskjenQAymFXLv+4qKbbHueQdJXHu2nKiofey+Zozke70MZhR5I3zaJUeCu8vQHNBQ5nVm2MoilZRPLAacOkJCjcKU4J9tPMYLthkZ+Bs7tU=',
-  user: { userID: 'user1' },
-};
-
-const user2Config = {
-  token:
-    '03AAAAAGJejuoAEHd0endqbmZyZGRhdHZzZTgAoI0taoAfOuaTddMCdc1eifHRonxvuF/FZ/bOBL/Zl2h1HqJNigllyi/FMeDHVwyC0biuzhIjBpQVY/v38qC3eIe3AsDjz9JSq9MBUFH27Vg57tVqW1sgDF5JvCviS5NgKt3uU3IyKPhJN82fyIy3nHiM9S7JmPbx5zS4HD5+28VyriDMqodyo9j3E8+0m3o+32e6fLwRI4Coi/AZUToTDuo=',
-  user: { userID: 'user2' },
-};
+// const user1Config = {
+//   token:
+//     '03AAAAAGJejs8AEGdsNGNubW42bmJkM3RzNjQAoI6M09ogWIqlCTBB/86KjXDmOEd8wJgWPboB542shOYZ0uqqRQY/JpS5lz8ZZ5W7URN3a4BIv94WUExV+AimuN6c/cUgzUG6J608QgDWGaRdskjenQAymFXLv+4qKbbHueQdJXHu2nKiofey+Zozke70MZhR5I3zaJUeCu8vQHNBQ5nVm2MoilZRPLAacOkJCjcKU4J9tPMYLthkZ+Bs7tU=',
+//   user: { userID: 'user1' },
+// };
+//
+// const user2Config = {
+//   token:
+//     '03AAAAAGJejuoAEHd0endqbmZyZGRhdHZzZTgAoI0taoAfOuaTddMCdc1eifHRonxvuF/FZ/bOBL/Zl2h1HqJNigllyi/FMeDHVwyC0biuzhIjBpQVY/v38qC3eIe3AsDjz9JSq9MBUFH27Vg57tVqW1sgDF5JvCviS5NgKt3uU3IyKPhJN82fyIy3nHiM9S7JmPbx5zS4HD5+28VyriDMqodyo9j3E8+0m3o+32e6fLwRI4Coi/AZUToTDuo=',
+//   user: { userID: 'user2' },
+// };
 
 enum ChatState {
   preparing,
@@ -95,7 +94,6 @@ const RemoteVideoWidget = ({ videoStream }: { videoStream?: MediaStream }) => {
 };
 
 const ChatRoom: React.FC = () => {
-  //@ts-ignore
   const { V2EContract, Account } = useModel('V2EContract');
 
   const [countdownInSecs, setCountdownInSecs] = useState(0);
@@ -114,7 +112,8 @@ const ChatRoom: React.FC = () => {
 
   const [failedReason, setFailedReason] = useState<string>('');
 
-  const params = useParams<{ channel: string }>();
+  const history = useHistory();
+  const query = history.location['query'];
 
   useEffect(() => {
     if (
@@ -125,14 +124,6 @@ const ChatRoom: React.FC = () => {
       console.log('stream destroyed');
     }
   }, [chatState]);
-
-  function mockSession(user: any) {
-    console.log('mock user is {}', user);
-    setChatSession((session) => {
-      return { ...session, userId: user.user.userID, roomId: '1', token: user.token };
-    });
-    transitionToConnecting();
-  }
 
   function onRate(rate: Rate) {
     setRateInfo((rateInfo) => {
@@ -145,7 +136,7 @@ const ChatRoom: React.FC = () => {
 
   function transitionToMatching() {
     setChatState(ChatState.matching);
-    setCountdownInSecs(5);
+    setCountdownInSecs(30);
   }
 
   function transitionToConnecting() {
@@ -178,16 +169,16 @@ const ChatRoom: React.FC = () => {
     if (chatState != ChatState.preparing) {
       return;
     }
-    // TODO: disable checks for testing.
-    // if (!V2EContract || !Account) {
-    //   transitionToFailed(new Error("no contract or account available"));
-    //   return;
-    // }
-    //
-    // if (!params.channel) {
-    //   transitionToFailed(new Error("no channel selected"));
-    //   return;
-    // }
+
+    if (!V2EContract || !Account) {
+      transitionToFailed(new Error('no contract or account available'));
+      return;
+    }
+
+    if (!query.channel) {
+      transitionToFailed(new Error('no channel selected'));
+      return;
+    }
 
     const promises = [];
     // clear states
@@ -208,19 +199,23 @@ const ChatRoom: React.FC = () => {
     if (chatState != ChatState.matching) {
       return;
     }
-    requestSession(Account, params.channel, 5)
+
+    requestSession(Account, query.channel, 30)
       .then((sessionResponse) => {
-        console.log('session response');
         if (typeof sessionResponse != 'object') {
           throw new Error('response unknown');
+        }
+        if (sessionResponse.result == 'none') {
+          transitionToFailed(Error('no matching'));
         }
         const chatSession: ChatSession = {
           ...sessionResponse,
         };
         setChatSession(chatSession);
+        transitionToConnecting();
       })
       .catch((err) => {
-        // transitionToFailed(err);
+        transitionToFailed(err);
       });
   }, [chatState]);
 
@@ -229,7 +224,9 @@ const ChatRoom: React.FC = () => {
       return;
     }
     zgEngine.on('roomStateUpdate', async (roomId, state, errorCode, extendedData) => {
+      console.log('roomStateUpdate', state);
       if (state == 'CONNECTED') {
+        console.log('CONNECTED', roomId);
         let streamID = new Date().getTime().toString();
         if (!streamState.current.localStream) {
           throw new Error('local stream not found');
@@ -241,6 +238,7 @@ const ChatRoom: React.FC = () => {
     });
     zgEngine.on('roomStreamUpdate', async (roomID, updateType, streamList, extendedData) => {
       if (updateType == 'ADD') {
+        console.log('ADD', roomID, streamList);
         const streamID = streamList[0].streamID;
         streamState.current.remoteStream = await zgEngine.startPlayingStream(streamID);
         streamState.current.pullStreamReady = true;
@@ -249,7 +247,12 @@ const ChatRoom: React.FC = () => {
     });
 
     zgEngine
-      .loginRoom(chatSession.roomId, chatSession.token, { userID: chatSession.userId })
+      .loginRoom(
+        chatSession.roomId,
+        chatSession.token,
+        { userID: chatSession.userId },
+        { userUpdate: true },
+      )
       .catch((error) => {
         transitionToFailed(error);
       });
@@ -304,11 +307,6 @@ const ChatRoom: React.FC = () => {
   if (chatState == ChatState.matching) {
     content = (
       <div>
-        <div>
-          mocked:
-          <button onClick={() => mockSession(user1Config)}>user1</button>
-          <button onClick={() => mockSession(user2Config)}>user2</button>
-        </div>
         <div className={style.matching_container}>
           <div className={style.matching_text}>MATCHING...</div>
           <div className={style.matching_countdown}>{countdownInSecs}</div>
@@ -346,8 +344,8 @@ const ChatRoom: React.FC = () => {
                 <p className={style.toolbar_button_bottom_text}>Microphone</p>
               </div>
             </div>
-            <OnChainERC721Widget account={'0x8b684993d03cc484936cf3a688ddc9937244f1d3'} />
-            <OnChainERC20Widget account={'0xd8da6bf26964af9d7eed9e03e53415d37aa96045'} />
+            <OnChainERC721Widget account={chatSession.peerAccount} />
+            <OnChainERC20Widget account={chatSession.peerAccount} />
             <RateWidget showRate={rateInfo.showRate} rate={rateInfo.rate} onRated={onRate} />
           </div>
         </div>

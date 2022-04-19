@@ -41,3 +41,5 @@ export const erc20contracts = [
 
 export const ethplorerApiEndpoint = 'https://api.ethplorer.io';
 export const ethplorerKey = 'freekey';
+
+export const matchServerAddress = 'http://44.242.150.190:6699';

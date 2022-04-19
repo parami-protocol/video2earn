@@ -16,18 +16,19 @@ async function getERC20Info(address: string): Promise<ERC20Info> {
   const ethBalance = addressInfo.ETH.balance;
   const ethValueInUSD = ethBalance * addressInfo.ETH.price.rate;
 
-  const erc20ValueInUSD = addressInfo.tokens
-    .filter((token) => {
-      return token.tokenInfo.price != false;
-    })
-    .map((token) => {
-      if (typeof token.tokenInfo.price === 'boolean') {
-        throw Error('token price is boolean type');
-      }
-      const rate = token.tokenInfo.price.rate;
-      return (token.balance / Math.pow(10, token.tokenInfo.decimals)) * rate;
-    })
-    .reduce((prev, current) => prev + current, 0);
+  const erc20ValueInUSD =
+    addressInfo?.tokens
+      ?.filter((token) => {
+        return token.tokenInfo.price != false;
+      })
+      ?.map((token) => {
+        if (typeof token.tokenInfo.price === 'boolean') {
+          throw Error('token price is boolean type');
+        }
+        const rate = token.tokenInfo.price.rate;
+        return (token.balance / Math.pow(10, token.tokenInfo.decimals)) * rate;
+      })
+      ?.reduce((prev, current) => prev + current, 0) || 0;
 
   return { ethBalance, ethValueInUSD, erc20ValueInUSD };
 }
@@ -71,9 +72,13 @@ export const OnChainERC721Widget = ({ account }: { account: string }) => {
   const [assets, setAssets] = useState<Assets>({ assets: [] });
 
   useEffect(() => {
-    fetchOpenSeaAssetOf(account, 10).then((assets) => {
-      setAssets(assets);
-    });
+    fetchOpenSeaAssetOf(account, 10)
+      .then((assets) => {
+        setAssets(assets);
+      })
+      .catch((e) => {
+        console.log(e);
+      });
   }, []);
 
   if (!assets) {
