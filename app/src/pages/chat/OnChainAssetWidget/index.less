@@ -5,13 +5,23 @@
   overflow: hidden;
   z-index: 999;
   display: flex;
+  flex-direction: column;
   background-color: rgba(255, 255, 255, 0.3);
   padding-left: 5px;
   padding-right: 5px;
   border-radius: 10px;
-  height: 150px;
+  height: 230px;
 }
 
+.on_chain_assets_title {
+  display: flex;
+  justify-content: center;
+}
+
+.on_chain_assets_content {
+  display: flex;
+  justify-content: space-around;
+}
 .asset {
   margin: 10px 5px;
   width: 130px;
@@ -19,44 +29,48 @@
   justify-content: center;
   align-content: center;
   overflow: hidden;
-  text-align:center;
+  text-align: center;
   background-color: white;
 }
 
 .asset_img {
   max-width: 100%;
-  max-height: 100%
+  height: 150px;
 }
 
-.asset_info {
-
+.asset_value {
+  display: flex;
+  justify-content: center;
 }
 
 .coin_root {
-  position: absolute;
+  position: relative;
   top: 130px;
-  left: 0px;
+  left: 0;
   z-index: 1000;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-around;
-  width: 100%;
-  height: 54px;
-  width: 210px;
+  display: inline grid;
+  grid-template-columns: 1fr 1fr;
+  height: 120px;
   background-color: rgba(255, 255, 255, 0.3);
   border-radius: 10px;
   border-color: aqua;
   border-width: 2em;
+  padding: 10px;
 }
 
-.coin_card {
-  position: relative;
-  flex-direction: column;
-  flex-wrap: wrap;
+.coin_title {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
   align-items: center;
-  justify-content: space-around;
-  z-index: 500;
+  font-size: 16px;
+}
+
+.coin_value {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .coin_img_container {
@@ -66,18 +80,11 @@
 }
 
 .coin_item_img {
-  width: 20px;
-  height: 20px;
+  width: 30px;
+  height: 30px;
   color: rgb(0, 0, 0);
   background: rgb(255, 255, 255);
   border-radius: 24px;
   cursor: pointer;
 }
 
-.coin_item_value_text {
-  position: relative;
-  top: 5px;
-  width: 100%;
-  font-size: 10px;
-  text-align: center;
-}

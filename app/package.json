@@ -59,6 +59,7 @@
     "classnames": "^2.3.0",
     "ethers": "^5.5.4",
     "lodash": "^4.17.0",
+    "mini-create-react-context": "^0.4.1",
     "moment": "^2.29.0",
     "omit.js": "^2.0.2",
     "rc-menu": "^9.1.0",
@@ -69,6 +70,7 @@
     "react-helmet-async": "^1.2.0",
     "react-icons": "^4.3.1",
     "umi": "^3.5.0",
+    "unist-util-filter": "^4.0.0",
     "web3modal": "^1.9.6",
     "zego-express-engine-webrtc": "^2.15.0"
   },

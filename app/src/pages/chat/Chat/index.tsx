@@ -13,13 +13,13 @@ const zgEngine = new ZegoExpressEngine(573234333, 'wss://webliveroom573234333-ap
 
 const user1Config = {
   token:
-    '03AAAAAGJacbAAEGEyajU5OHp3MXVucXZkNDQAoHKSEwPXTkpuS7CglJoz1D7TtoaL8h3Ro8ZVeCgeSPr1m8iwIbBoRTWcgbq3dvdPKXInZDwWY18uyROK2KLITDpgbL0Ynj9X19a8grNfe+NX3HHWoPQJ1K4GZkFmXDUQ4MyenAV51w8OT0je09odCZsR+aSIHQfkcF5qvYDwUGuY2EKBpySk8sG2NAX4ssyOejq+jTgE6YinqbiE4lKkeZg=',
+    '03AAAAAGJejs8AEGdsNGNubW42bmJkM3RzNjQAoI6M09ogWIqlCTBB/86KjXDmOEd8wJgWPboB542shOYZ0uqqRQY/JpS5lz8ZZ5W7URN3a4BIv94WUExV+AimuN6c/cUgzUG6J608QgDWGaRdskjenQAymFXLv+4qKbbHueQdJXHu2nKiofey+Zozke70MZhR5I3zaJUeCu8vQHNBQ5nVm2MoilZRPLAacOkJCjcKU4J9tPMYLthkZ+Bs7tU=',
   user: { userID: 'user1' },
 };
 
 const user2Config = {
   token:
-    '03AAAAAGJacc8AEGRlYnJwemh1ZGJpMGJqbmEAoHDQ+k76LqCoF5AcgeCbyImT78MCOW5JbjmdxtqT6EWv252Dd6zth489RW7qnJTIoXRGj3+gMthRsEnEgasICg/bLMI5ka37CrsbAjJTodWEwqFVXL+uRknYUhRUkqjzuzZZqWBqfDLoBn7sFRc4jWgbCx08g7AK+ECGsCQm9FFYanUoiPlZyL5yWWZevvN7n9rmTKAjBodw9GM22Ck5oCs=',
+    '03AAAAAGJejuoAEHd0endqbmZyZGRhdHZzZTgAoI0taoAfOuaTddMCdc1eifHRonxvuF/FZ/bOBL/Zl2h1HqJNigllyi/FMeDHVwyC0biuzhIjBpQVY/v38qC3eIe3AsDjz9JSq9MBUFH27Vg57tVqW1sgDF5JvCviS5NgKt3uU3IyKPhJN82fyIy3nHiM9S7JmPbx5zS4HD5+28VyriDMqodyo9j3E8+0m3o+32e6fLwRI4Coi/AZUToTDuo=',
   user: { userID: 'user2' },
 };
 
@@ -89,7 +89,7 @@ const RemoteVideoWidget = ({ videoStream }: { videoStream?: MediaStream }) => {
 
   return (
     <div className={style.remote_video_card}>
-      <video className={style.remote_video} ref={remoteVideoRef} autoPlay muted playsInline />
+      <video className={style.remote_video} ref={remoteVideoRef} autoPlay playsInline />
     </div>
   );
 };

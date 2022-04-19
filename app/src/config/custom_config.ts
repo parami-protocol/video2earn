@@ -38,3 +38,6 @@ export const erc20contracts = [
     img: './imgs/btc.png',
   },
 ];
+
+export const ethplorerApiEndpoint = 'https://api.ethplorer.io';
+export const ethplorerKey = 'freekey';
