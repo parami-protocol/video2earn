@@ -4,6 +4,7 @@ import {registry} from "../service/matching";
 const router = express.Router();
 
 router.post('/sessions', function (req, res, next) {
+    console.log("hello")
     const query = req.query;
 
     const channel = query.channel as string;
@@ -42,6 +43,7 @@ router.post('/sessions', function (req, res, next) {
         },
         (error) => {
             clearTimeout(timeout);
+            registry.unregister(user);
             res.status(500);
             console.error(error)
             res.end(error.message);
