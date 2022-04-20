@@ -10,8 +10,17 @@ export type OnErrorFunction = (err: Error) => void;
 
 export type callback = { onMatch: OnMatchFunction, onError: OnErrorFunction, channel: string };
 
-function generateToken(userId: string): string {
-    return generateToken04(zegoAppId, userId, zegoServerSecret!, 300000);
+function generateToken(userId: string, roomId: string): string {
+    const payloadObject = {
+        room_id: roomId,
+        privilege: {
+            1: 1,   // loginRoom: 1 pass , 0 not pass
+            2: 1   // publishStream: 1 pass , 0 not pass
+        },
+        stream_id_list: null
+    };
+    return generateToken04(zegoAppId, userId, zegoServerSecret!, 3600, JSON.stringify(payloadObject));
+
 }
 
 function uuid() {
@@ -65,21 +74,27 @@ class MatchingRegistry {
         delete this.account2Callback[matchedUser!.account];
 
         const roomId = uuid();
-        onMatch(roomId, generateToken(user.account), matchedUser!.account);
-        callback.onMatch(roomId, generateToken(matchedUser!.account), user.account);
+        onMatch(roomId, generateToken(user.account, roomId), matchedUser!.account);
+        callback.onMatch(roomId, generateToken(matchedUser!.account, roomId), user.account);
         console.log("after register with match", roomId, user, channel, this.channel2User, this.account2Callback);
     }
 
+    // FIXME: add owner for callbacks
     public unregister(user: User): void {
-        console.log(`before unregister ${user} ${this.channel2User} ${this.account2Callback}`);
+        console.log(`before unregister ${user.account}`, this.channel2User, this.account2Callback);
         const callback = this.account2Callback[user.account];
-        delete this.account2Callback[user.account];
+
+        if (!callback) {
+            return;
+        }
 
         this.channel2User[callback.channel] =
             this.channel2User[callback.channel].filter(
                 (item) => item.account != user.account);
 
-        console.log(`after unregister ${user} ${this.channel2User} ${this.account2Callback}`);
+        delete this.account2Callback[user.account];
+
+        console.log(`after unregister ${user.account}`, this.channel2User, this.account2Callback);
     }
 }
 

@@ -1,5 +1,6 @@
 import express from "express";
 import {registry} from "../service/matching";
+import {clearTimeout} from "timers";
 
 const router = express.Router();
 
@@ -23,11 +24,18 @@ router.post('/sessions', function (req, res, next) {
     console.log(`matching session, channel = ${channel}, account = ${account}, timeout = ${timeoutInMillis}`);
     const user = {account}
     const timeout = setTimeout(() => {
+            console.log("timeout clean user", user);
             registry.unregister(user);
             res.status(200);
             res.json({result: "none"})
         }, timeoutInMillis
     )
+
+    res.on('close', function () {
+        console.log("connection closed early, clean timeout");
+        clearTimeout(timeout);
+        registry.unregister(user);
+    })
 
     registry.register(user, channel,
         (roomId, tokenId, peerAccount) => {
