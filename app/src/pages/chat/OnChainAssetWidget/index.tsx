@@ -72,7 +72,7 @@ export const OnChainERC721Widget = ({ account }: { account: string }) => {
   const [assets, setAssets] = useState<Assets>({ assets: [] });
 
   useEffect(() => {
-    fetchOpenSeaAssetOf(account, 10)
+    fetchOpenSeaAssetOf(account, 2)
       .then((assets) => {
         setAssets(assets);
       })

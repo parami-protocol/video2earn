@@ -6,7 +6,7 @@ import { useHistory } from 'umi';
 import { OnChainERC20Widget, OnChainERC721Widget } from '@/pages/chat/OnChainAssetWidget';
 import style from './index.less';
 import { Rate, RateWidget } from '@/pages/chat/RateWidget';
-import { Button } from 'antd';
+import { Button, message } from 'antd';
 
 const zgEngine = new ZegoExpressEngine(573234333, 'wss://webliveroom573234333-api.imzego.com/ws');
 
@@ -123,6 +123,14 @@ const ChatRoom: React.FC = () => {
       zgEngine.destroyStream(streamState.current.localStream);
       console.log('stream destroyed');
     }
+
+    if (chatState == ChatState.connecting || chatState == ChatState.chatting) {
+      console.log('register room will expire callback');
+      zgEngine.on('tokenWillExpire', async (roomID: string) => {
+        console.log('room will expire');
+        message.error('room will expire');
+      });
+    }
   }, [chatState]);
 
   function onRate(rate: Rate) {
@@ -224,19 +232,25 @@ const ChatRoom: React.FC = () => {
       return;
     }
     zgEngine.on('roomStateUpdate', async (roomId, state, errorCode, extendedData) => {
-      console.log('roomStateUpdate', state);
+      console.log('roomStateUpdate', state, errorCode, extendedData);
       if (state == 'CONNECTED') {
         console.log('CONNECTED', roomId);
-        let streamID = new Date().getTime().toString();
+        let streamID = chatSession.userId + new Date().getTime().toString();
         if (!streamState.current.localStream) {
           throw new Error('local stream not found');
         }
-        zgEngine.startPublishingStream(streamID, streamState.current.localStream);
+        const result = zgEngine.startPublishingStream(streamID, streamState.current.localStream);
+        if (!result) {
+          transitionToFailed(Error('client publish stream error'));
+          return;
+        }
+        console.log('start publish stream');
         streamState.current.pushStreamReady = true;
         tryTransitionToChatting();
       }
     });
     zgEngine.on('roomStreamUpdate', async (roomID, updateType, streamList, extendedData) => {
+      console.log('roomStreamUpdate', updateType);
       if (updateType == 'ADD') {
         console.log('ADD', roomID, streamList);
         const streamID = streamList[0].streamID;
@@ -246,6 +260,7 @@ const ChatRoom: React.FC = () => {
       }
     });
 
+    console.log('chat session', chatSession);
     zgEngine
       .loginRoom(
         chatSession.roomId,
@@ -258,6 +273,7 @@ const ChatRoom: React.FC = () => {
       });
 
     return () => {
+      console.log('deregister room event');
       zgEngine.off('roomStateUpdate');
       zgEngine.off('roomStreamUpdate');
     };
@@ -278,6 +294,7 @@ const ChatRoom: React.FC = () => {
     }, 300 * 1000);
 
     zgEngine.on('roomStreamUpdate', async (roomID, updateType, streamList, extendedData) => {
+      console.log('roomStreamUpdate when chatting');
       if (updateType == 'DELETE' && streamState.current.remoteStream) {
         //@ts-ignore
         const streamId = streamState.current.remoteStream.streamId;
@@ -290,7 +307,7 @@ const ChatRoom: React.FC = () => {
       clearTimeout(showRateTimeout);
       clearTimeout(endChatTimeout);
       zgEngine.off('roomStreamUpdate');
-      zgEngine.logoutRoom('1');
+      zgEngine.logoutRoom(chatSession.roomId);
     };
   }, [chatState]);
 

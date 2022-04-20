@@ -40,6 +40,6 @@ export const erc20contracts = [
 ];
 
 export const ethplorerApiEndpoint = 'https://api.ethplorer.io';
-export const ethplorerKey = 'freekey';
+export const ethplorerKey = 'EK-997Hg-Big71mQ-fUCAo';
 
 export const matchServerAddress = 'https://api.v2e.parami.io';
