@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-contrib/cors"
 
 	"video2earn/matchserver/internal/match"
 	"video2earn/matchserver/internal/token/token04"
@@ -34,6 +35,7 @@ func main() {
 	matchRegistry.Run()
 
 	router := gin.Default()
+	router.Use(cors.Default())
 
 	router.POST("/sessions", requestSessions)
 
