@@ -1,19 +1,35 @@
 package main
 
 import (
+	"encoding/json"
+	"os"
 	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
 
 	"video2earn/matchserver/internal/match"
+	"video2earn/matchserver/internal/token/token04"
+)
+
+const (
+	appId = 573234333
 )
 
 var (
-	matchRegistry match.MatchRegistry = nil
+	matchRegistry    match.MatchRegistry = nil
+	zegoServerSecret                     = ""
 )
 
+func init() {
+	zegoServerSecret = os.Getenv("ZEGO_SERVER_SECRET")
+}
+
 func main() {
+	if zegoServerSecret == "" {
+		panic("no zego server secret is set")
+	}
+
 	matchRegistry = match.NewMatchingRegistry([]int{1, 2})
 	matchRegistry.Run()
 
@@ -25,11 +41,12 @@ func main() {
 }
 
 type SessionResponse struct {
-	Result     string `json:"result"`
-	PeerUserId string `json:"peerUserId"`
-	UserId     string `json:"userId"`
-	RoomId     string `json:"roomId"`
-	Token      string `json:"token"`
+	Result      string `json:"result"`
+	PeerUserId  string `json:"peerUserId"`
+	PeerAccount string `json:"peerAccount"`
+	UserId      string `json:"userId"`
+	RoomId      string `json:"roomId"`
+	Token       string `json:"token"`
 }
 
 func requestSessions(c *gin.Context) {
@@ -85,7 +102,7 @@ func requestSessions(c *gin.Context) {
 			roomId := result.RoomId
 			peerAccount := result.Peer
 
-			c.JSON(200, &SessionResponse{Result: "ok", PeerUserId: peerAccount, UserId: account, RoomId: roomId})
+			c.JSON(200, &SessionResponse{Result: "ok", PeerUserId: peerAccount, PeerAccount: peerAccount, UserId: account, RoomId: roomId, Token: generateToken(account, roomId)})
 		}
 	case <-time.After(time.Second * time.Duration(timeout)):
 		{
@@ -94,4 +111,27 @@ func requestSessions(c *gin.Context) {
 		}
 	}
 
+}
+
+func generateToken(userId string, roomId string) string {
+	privilege := make(map[int]int)
+	privilege[token04.PrivilegeKeyLogin] = token04.PrivilegeEnable
+	privilege[token04.PrivilegeKeyPublish] = token04.PrivilegeEnable
+
+	payloadData := &token04.RtcRoomPayLoad{
+		RoomId:       roomId,
+		Privilege:    privilege,
+		StreamIdList: nil,
+	}
+
+	payload, err := json.Marshal(payloadData)
+	if err != nil {
+		panic(err)
+	}
+
+	token, err := token04.GenerateToken04(appId, userId, zegoServerSecret, 300, string(payload))
+	if err != nil {
+		panic(err)
+	}
+	return token
 }

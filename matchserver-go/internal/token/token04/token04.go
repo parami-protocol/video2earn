@@ -108,3 +108,9 @@ func makeRandomIv() []byte {
 	}
 	return result
 }
+
+type RtcRoomPayLoad struct {
+	RoomId       string      `json:"room_id"`           //房间id；用于对接口的房间id进行强验证
+	Privilege    map[int]int `json:"privilege"`         //权限位开关列表；用于对接口的操作权限进行强验证
+	StreamIdList []string    `json:"stream_id_list"`    //流列表；用于对接口的流id进行强验证；允许为空，如果为空，则不对流id验证
+}
