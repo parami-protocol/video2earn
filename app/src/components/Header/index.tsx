@@ -2,10 +2,9 @@ import { Button } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useIntl, useModel, history } from 'umi';
 import style from './style.less';
-// import { FaWallet } from 'react-icons/fa';
 import { LogoutOutlined } from '@ant-design/icons';
 
-const Header: React.FC = () => {
+const Header = () => {
   const { Account, ChainId, connect, disconnect } = useModel('web3');
   const [menu, setMenu] = useState<boolean>(false);
   const [avavible, setAvavible] = useState<boolean>(false);
@@ -23,14 +22,6 @@ const Header: React.FC = () => {
   return (
     <>
       <div className={style.headerContainer}>
-        <div
-          className={style.logo}
-          onClick={() => {
-            history.push('/');
-          }}
-        >
-          <span>Video2Earn</span>
-        </div>
         <div className={style.connectWallet}>
           {!!Account && avavible ? (
             <div className={style.menuButton}>

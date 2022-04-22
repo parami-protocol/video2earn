@@ -5,6 +5,7 @@ import defaultSettings from '../config/defaultSettings';
 import { notification } from 'antd';
 import NoFoundPage from './pages/404';
 import Header from './components/Header';
+import {Link} from "umi";
 
 export const initialStateConfig = {
   // loading: <Loading />,
@@ -34,11 +35,16 @@ export const request: RequestConfig = {
 };
 
 export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) => {
+  const styles = {
+    fontSize: "20px",
+    color: "white",
+  }
   return {
-    rightContentRender: () => undefined,
     disableContentMargin: true,
+    menuHeaderRender: () => <Link to="/" style={styles}>Video2Earn</Link>,
+    headerTitleRender: () => <Link to="/" style={styles}>Video2Earn</Link>,
     footerRender: () => undefined,
-    headerRender: () => <Header />,
+    rightContentRender: () => Header(),
     onPageChange: () => {
       setInitialState({ ...initialState });
     },
