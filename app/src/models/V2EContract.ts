@@ -17,7 +17,7 @@ export default () => {
       setV2EContract(null);
     }
     if (!!Account) {
-      if (ChainId !== 1 && ChainId !== 4) {
+      if (ChainId !== 1 && ChainId !== 4 && ChainId != 97) {
         setV2EContract(null);
         return;
       }

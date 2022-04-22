@@ -55,7 +55,14 @@ module.exports = {
         network_id: 4,
         gas: 4500000,
         gasPrice: 10000000000,
-    }
+    },
+    bsctestnet: {
+      provider: () => new HDWalletProvider(mnemonic, `https://data-seed-prebsc-1-s1.binance.org:8545`),
+      network_id: 97,
+      confirmations: 10,
+      timeoutBlocks: 200,
+      skipDryRun: true
+    },
     // Another network with more advanced options...
     // advanced: {
     // port: 8777,             // Custom port
@@ -125,6 +132,7 @@ module.exports = {
   // }
   plugins: ['truffle-plugin-verify'],
   api_keys: {
-    etherscan: 'AUXAI7C81WNTM24SMTYFCGC853HX47VJPW'
+    etherscan: 'AUXAI7C81WNTM24SMTYFCGC853HX47VJPW',
+    bscscan: 'QS69YUIGVXCT254FBSSVV1RJXC5FYIJAUS'
   }
 };

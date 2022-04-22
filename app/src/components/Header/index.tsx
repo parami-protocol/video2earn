@@ -13,7 +13,7 @@ const Header: React.FC = () => {
   const intl = useIntl();
 
   useEffect(() => {
-    if (ChainId === 4) {
+    if (ChainId === 4 || ChainId == 97) {
       setAvavible(true);
     } else {
       setAvavible(false);

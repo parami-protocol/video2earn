@@ -61,10 +61,10 @@ export default () => {
 
   const connect = useCallback(async () => {
     const web3Modal = new Web3Modal({
-      network: 'rinkeby',
       cacheProvider: true,
       providerOptions,
     });
+
     try {
       const provider = await web3Modal.connect();
       setProvider(provider);
@@ -78,10 +78,10 @@ export default () => {
       setNetwork(network);
       const chainId = await signer.getChainId();
       setChainId(chainId);
-      if (chainId !== 4) {
+      if (chainId !== 4 && chainId !== 97) {
         notification.error({
           message: 'Unsupported Chain',
-          description: 'This feature is only supported on Rinkeby',
+          description: 'This feature is only supported on Rinkeby and BSC testnet',
           duration: null,
         });
       }
@@ -97,10 +97,10 @@ export default () => {
       });
       provider.on('chainChanged', (newChainId: number) => {
         setChainId(Number(newChainId));
-        if (Number(newChainId) !== 4) {
+        if (chainId !== 4 && chainId !== 97) {
           notification.error({
             message: 'Unsupported Chain',
-            description: 'This feature is only supported on Rinkeby',
+            description: 'This feature is only supported on Rinkeby && BSC testnet',
             duration: null,
           });
         }

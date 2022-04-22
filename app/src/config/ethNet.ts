@@ -4,4 +4,5 @@ export default {
   4: 'Rinkeby Test Network',
   5: 'Goerli Test Network',
   42: 'Kovan Test Network',
+  97: 'BSC Test Network',
 };
